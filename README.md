@@ -1,15 +1,19 @@
 # Logistics  
 
 **Q1:** At what time in the week would your group be available to meet online?  
-**Example:**  
-*We are available to meet online on weekends from 12pm-8pm (12-2pm Saturday + Sunday), as well as from 4pm-6pm on Fridays.*  
-*Our weekly meeting will be Thursday 11am-12pm.*  
+We are going to be meeting mondays from 2-4, and thursdays from 4-6 (on discord) is when everyone is available.
+
 
 ---
 
 # Timeline: Weekly Meeting Goals  
 
-**Q2:** What is your goals that your group want to achieve in each weekly meeting?  
+**Q2:** What is your goals that your group want to achieve in each weekly meeting?
+Prior to 10/4 we will plan on finishing up our project idea and assigning roles to each member.
+Prior to 10/11 we will complete a UI layout of the project and finish brainstorming and finish setting up a db of choice with some user auth if needed.
+Prior to 10/18 we will merge the two ideas and fix any merging issues and any bugs that arise.
+Prior to 10/25 we will add any API's and add some testing to make sure it works as intended.
+
 **Example:**  
 *Prior to 3/13: Weekly Meeting we will plan out some preliminary info/idea for the project itself ahead of the scheduled meeting like which data source/API and data structures we will use in our backend. We will browse [the given list of public APIs for inspiration](https://github.com/public-apis/public-apis).*  
 
@@ -74,9 +78,9 @@
 
 # Track 2: Technology for Public Goods 
 
-**Problem 2:**
+**Problem 2:People amy want to be more mindful about environmental impact but may not know how to best apporach it**
 
-**Solution 2:** 
+**Solution 2: Creating a app that scans food labels and gives a rating on the carbon foorprint. This would keep you eco-conscious about the impact a certain product has on the environment.** 
 
 **Problem 3:** 
 
