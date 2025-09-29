@@ -25,9 +25,9 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 
 # Communication  
 
-**Q3a:** How can your group communicate when doing the Full Stack Group Project?  
-**Q3b:** What are the usernames of each group member on that platform?  
-**Q3c:** What is your group’s expected response time to messages?  
+**Q3a:** How can your group communicate when doing the Full Stack Group Project?  Discord
+**Q3b:** What are the usernames of each group member on that platform? mrchavez7034 (Daniel), jessie8556(Jessie), notakitsune_ (Rei), brownie1104(Ryyan)
+**Q3c:** What is your group’s expected response time to messages?  Same-day expected response time depending on urgency and deadlines.
 
 **Example:**  
 *We will use Discord for communication*  
@@ -82,9 +82,9 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 
 **Solution 2: Creating a app that scans food labels and gives a rating on the carbon foorprint. This would keep you eco-conscious about the impact a certain product has on the environment.** 
 
-**Problem 3:** 
+**Problem 3: There is no existing platform for students to advertise for goods and services that they could provide other students in their college commmunity with.** 
 
-**Solution 3:**  
+**Solution 3: We could create a platform where students can advertise their goods and services, others can review them, and transactions can be made. There can be communities and sub-communities created to cater to people in certain domains.**  
 
 # Track 3: Creative Coding and Cultural Expression
 
