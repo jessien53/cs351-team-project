@@ -55,6 +55,8 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 # Roles  
 
 **Q5:** How will your group divide your role in the Group Project?  
+Jessie & Rei - Frontend
+Ryyan & Daniel - Backend
 
 **Example:**  
 *Mauricio - Backend, Justin - Project Lead, Claudia - Frontend.*  
@@ -64,6 +66,7 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 # Tech Stacks
 
 **Q6:** Which tech stacks will your group use? (Django + React or Flask + React)
+Django + React
 
 ---
 # Full Stack Group Project Track  
@@ -89,8 +92,10 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 # Track 3: Creative Coding and Cultural Expression
 
 **Idea - Story - Inspiration 4:**
+People listen to music and recognize samples or instrumentation from different cultures in the songs. An app that takes a song and provides a flavor profile of the cultures it was inspired by or it has taken samples or instrumentation from.
 
 **Implementation 4:**
+A website using React and Django where people upload an audio file and we use some sort of API to take apart the audio and dissect each part to identify the influences then return a visiualization of the influences.
 
 **Idea - Story - Inspiration 5:**
 
@@ -100,6 +105,9 @@ Prior to 10/25 we will add any API's and add some testing to make sure it works 
 # Idea Finalization
 
 **From 5 project ideas you have above, please choose one of the project that you are going with for the rest of the semester. Explain why you are going with that project**
+Problem 3: There is no existing platform for students to advertise for goods and services that they could provide other students in their college commmunity with.
+
+Solution 3: We could create a platform where students can advertise their goods and services, others can review them, and transactions can be made. There can be communities and sub-communities created to cater to people in certain domains.
 
 # Extra Credit (Only do this if you are done with Idea Finalization)
 
