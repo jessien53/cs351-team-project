@@ -48,7 +48,9 @@ Rei will start with some basic desgin/formating of main pages then will split up
   - Help / FAQ screen
 
 # Requirement: GitHub Maintainance
-
+make sure we all have our own branches.
+make the git commits clear and useful to avoid confustion.
+meet once a week to contribute the same amount of effort.
 # Requirement: Project Frontend
 
 Waiting to create wire frame to implement
