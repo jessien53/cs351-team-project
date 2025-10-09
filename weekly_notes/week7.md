@@ -1,5 +1,7 @@
 # Requirement: Figma Wireframe
 
+Rei will start with some basic desgin/formating of main pages then will split up work following those as guides
+
 **Main Pages**
 
 - Home / feed screen
@@ -49,5 +51,7 @@
 # Requirement: GitHub Maintainance
 
 # Requirement: Project Frontend
+
+Waiting to create wire frame to implement
 
 # Requirement: Project Backend
