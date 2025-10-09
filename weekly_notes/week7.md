@@ -23,9 +23,6 @@ Rei will start with some basic desgin/formating of main pages then will split up
 - Search & Discovery
   - Search results screen
   - Filter / sort options screen
-- Transaction & Reviews
-  - Leave a review screen
-  - View all reviews screen
 - Profile & Settings
   - Public profile view screen
   - Saved / favorited listings screen
@@ -33,6 +30,8 @@ Rei will start with some basic desgin/formating of main pages then will split up
 **Other Pages**
 
 - Transaction & Reviews
+  - Leave a review screen
+  - View all reviews screen
   - Transaction confirmation screen
   - Payment / checkout screen
 - Profile & Settings
