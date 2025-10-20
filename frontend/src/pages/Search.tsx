@@ -1,31 +1,87 @@
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/Header";
 import FilterBar from "../components/search/FilterBar";
 import ProductCard from "../components/search/ProductCard";
+import type { Product, SortOption } from "../types/search";
+import { searchProducts } from "../services/search";
 
-const mockProducts = Array.from({ length: 12 }).map((_, i) => ({
-  title: i % 2 === 0 ? "Intro to AI Vol.4" : "Textbook",
-  price: "$40",
-  user: "Emily A.",
-  time: "2hrs ago",
-}));
+function useDebounced<T>(value: T, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}
 
 const Search: React.FC = () => {
+  const [query, setQuery] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [sort, setSort] = useState<SortOption>("relevance");
+  const [results, setResults] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const debouncedQuery = useDebounced(query, 350);
+
+  const fetchResults = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await searchProducts({ query: debouncedQuery, tags, sort });
+      setResults(res.results || []);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch results");
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedQuery, tags, sort]);
+
+  useEffect(() => {
+    // Only fetch when search is meaningful or filters change
+    fetchResults();
+  }, [fetchResults]);
+
+  const productNodes = useMemo(() => {
+    if (loading) {
+      return Array.from({ length: 8 }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-xl shadow-sm animate-pulse h-64"
+        />
+      ));
+    }
+    if (results.length === 0) {
+      return (
+        <div className="text-center text-gray-500 py-12">No results found.</div>
+      );
+    }
+    return results.map((p, i) => (
+      <ProductCard
+        key={p.id ?? i}
+        title={p.title}
+        price={p.price}
+        user={p.user}
+        time={p.time}
+      />
+    ));
+  }, [loading, results]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <FilterBar />
+      <FilterBar
+        query={query}
+        tags={tags}
+        sort={sort}
+        onQueryChange={setQuery}
+        onTagsChange={setTags}
+        onSortChange={setSort}
+      />
       <main className="px-8 py-6">
+        {error && <div className="mb-4 text-red-600">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {mockProducts.map((product, i) => (
-            <ProductCard
-              key={i}
-              title={product.title}
-              price={product.price}
-              user={product.user}
-              time={product.time}
-            />
-          ))}
+          {productNodes}
         </div>
       </main>
     </div>
