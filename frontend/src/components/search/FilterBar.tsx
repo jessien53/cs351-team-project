@@ -2,23 +2,17 @@ import React from "react";
 import type { SortOption } from "../../types/search";
 
 interface FilterBarProps {
-  query: string;
   tags: string[];
   sort: SortOption;
-  onQueryChange: (q: string) => void;
   onTagsChange: (tags: string[]) => void;
   onSortChange: (s: SortOption) => void;
 }
 
 const ALL_TAGS = ["Books", "Electronics", "Furniture", "Clothing", "Misc"];
 
-const FilterBar: React.FC<
-  Partial<FilterBarProps> & { onQueryChange?: (q: string) => void }
-> = ({
-  query = "",
+const FilterBar: React.FC<Partial<FilterBarProps>> = ({
   tags = [],
   sort = "relevance",
-  onQueryChange = () => {},
   onTagsChange = () => {},
   onSortChange = () => {},
 }) => {
@@ -46,15 +40,6 @@ const FilterBar: React.FC<
           {tag}
         </button>
       ))}
-
-      <div className="flex-1 mx-6">
-        <input
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Search products"
-          className="w-full px-4 py-2 rounded-full border border-gray-300 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
-        />
-      </div>
 
       <div className="ml-auto">
         <select

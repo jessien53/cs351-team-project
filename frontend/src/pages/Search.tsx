@@ -4,6 +4,7 @@ import FilterBar from "../components/search/FilterBar";
 import ProductCard from "../components/search/ProductCard";
 import type { Product, SortOption } from "../types/search";
 import { searchProducts } from "../services/search";
+import { useLocation } from "react-router-dom";
 
 function useDebounced<T>(value: T, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -15,7 +16,9 @@ function useDebounced<T>(value: T, delay = 300) {
 }
 
 const Search: React.FC = () => {
-  const [query, setQuery] = useState("");
+  const location = useLocation();
+  const initialQ = new URLSearchParams(location.search).get("q") || "";
+  const [query, setQuery] = useState(initialQ);
   const [tags, setTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("relevance");
   const [results, setResults] = useState<Product[]>([]);
@@ -41,6 +44,13 @@ const Search: React.FC = () => {
     // Only fetch when search is meaningful or filters change
     fetchResults();
   }, [fetchResults]);
+
+  // keep query in sync if the URL changes (e.g., user used header search)
+  useEffect(() => {
+    const qFromUrl = new URLSearchParams(location.search).get("q") || "";
+    if (qFromUrl !== query) setQuery(qFromUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
 
   const productNodes = useMemo(() => {
     if (loading) {
@@ -71,10 +81,8 @@ const Search: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <FilterBar
-        query={query}
         tags={tags}
         sort={sort}
-        onQueryChange={setQuery}
         onTagsChange={setTags}
         onSortChange={setSort}
       />
