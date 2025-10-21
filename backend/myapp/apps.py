@@ -1,6 +1,7 @@
 # backend/myapp/apps.py
 from django.apps import AppConfig
 
+
 class MyappConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "myapp"
@@ -13,7 +14,7 @@ class MyappConfig(AppConfig):
         print("Populating the autocomplete Trie...")
 
         # Get all product names from the database
-        product_titles = Item.objects.values_list("title", flat=True) 
+        product_titles = Item.objects.values_list("title", flat=True)
 
         for title in product_titles:
             # Split titles into individual words
