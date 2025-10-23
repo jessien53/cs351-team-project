@@ -1,25 +1,25 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Environment Variables
+# Ignores sensitive keys and settings files in both root and /frontend
 .env
+.env.*
+
+# Python Virtual Environment
+# Ignores the folder containing your Python packages
+venv/
+.venv/
+env/
+
+# Python Bytecode
+# Ignores auto-generated compiled files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Node.js Dependencies
+# Ignores the thousands of files in your frontend's node_modules folder
+node_modules/
+
+# IDE/Editor Settings
+# Ignores user-specific editor configurations (e.g., for VSCode)
+.vscode/
+.idea/
