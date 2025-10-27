@@ -41,3 +41,18 @@ Generic User Vs Veirifed Students
   - Error screen
   - Report listing / user screen
   - Help / FAQ screen
+**Backend**
+
+Set up Profiles and Users
+
+- set up profiles and users in database and functionality
+- user profiles are all the same except when verified student can post listings
+
+Set up creating new Listings 
+
+- get new info sent to backend database
+
+Chose Union-Find to implement search to help with filtering and similarity in searches
+
+
+Daniel will work on Authentication for users when signing in
