@@ -27,6 +27,10 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleLogoClick = () => {
+    navigate("/search");
+  };
+
   // Debounced autocomplete fetch
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -103,8 +107,15 @@ const Header: React.FC = () => {
 
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
-      <div className="flex items-center gap-3">
-        <button className="p-2 rounded hover:bg-gray-100 flex items-center bg-gray-200">
+      <div
+        className="flex items-center gap-3 cursor-pointer" // Added cursor-pointer
+        onClick={handleLogoClick} // Added onClick
+      >
+        <button
+          className="p-2 rounded hover:bg-gray-100 flex items-center bg-gray-200 pointer-events-none"
+          tabIndex={-1} // Make it non-focusable
+        >
+          {/* Added pointer-events-none so it doesn't intercept the div's click */}
           <span className="material-icons">apps</span>
         </button>
         <span className="text-xl font-bold text-gray-800">CampusMarket</span>
