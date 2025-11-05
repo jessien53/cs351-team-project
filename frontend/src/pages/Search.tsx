@@ -57,13 +57,13 @@ const Search: React.FC = () => {
       return Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-xl shadow-sm animate-pulse h-64"
+          className="bg-light rounded-xl shadow-sm animate-pulse h-64 border border-ui"
         />
       ));
     }
     if (results.length === 0) {
       return (
-        <div className="text-center text-gray-500 py-12">No results found.</div>
+        <div className="text-center text-dark py-12">No results found.</div>
       );
     }
     return results.map((p, i) => (
@@ -78,7 +78,7 @@ const Search: React.FC = () => {
   }, [loading, results]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-light">
       <Header />
       <FilterBar
         tags={tags}
@@ -87,7 +87,7 @@ const Search: React.FC = () => {
         onSortChange={setSort}
       />
       <main className="px-8 py-6">
-        {error && <div className="mb-4 text-red-600">{error}</div>}
+        {error && <div className="mb-4 text-accent">{error}</div>}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {productNodes}
         </div>

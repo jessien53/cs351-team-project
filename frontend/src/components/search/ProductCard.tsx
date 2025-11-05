@@ -13,17 +13,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
   user,
   time,
 }) => (
-  <div className="bg-white rounded-xl shadow-sm flex flex-col">
+  <div className="bg-light rounded-xl shadow-sm flex flex-col border border-ui">
     <img
       src="https://placehold.co/800"
       alt={title}
-      className="bg-gray-200 rounded-t-lg object-cover h-48 w-full"
+      className="bg-ui rounded-t-lg object-cover h-48 w-full"
     />
     <div className="flex-1 p-4">
-      <div className="font-semibold text-gray-800 mb-1">{title}</div>
-      <div className="text-lg font-bold text-gray-900 mb-2">{price}</div>
-      <div className="flex items-center text-sm text-gray-500 mt-auto">
-        <span className="w-6 h-6 bg-gray-300 rounded-full mr-2 inline-block" />
+      <div className="font-semibold text-dark mb-1">{title}</div>
+      <div className="text-lg font-bold text-dark mb-2">{price}</div>
+      <div className="flex items-center text-sm text-dark mt-auto">
+        <span className="w-6 h-6 bg-ui rounded-full mr-2 inline-block" />
         {user}
         <span className="mx-2">•</span>
         {time}

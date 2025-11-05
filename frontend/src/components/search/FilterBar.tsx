@@ -22,8 +22,8 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 px-8 py-4 bg-white border-b border-gray-200">
-      <button className="px-4 py-2 bg-gray-200 rounded-full font-medium text-gray-700 hover:bg-gray-300">
+    <div className="flex items-center gap-2 px-8 py-4 bg-light border-b border-ui">
+      <button className="px-4 py-2 bg-ui rounded-full font-medium text-dark hover:bg-ui">
         Show filters
       </button>
 
@@ -33,9 +33,9 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
           onClick={() => toggleTag(tag)}
           className={`px-4 py-2 rounded-full font-medium ${
             tags.includes(tag)
-              ? "bg-purple-100 text-purple-700"
-              : "bg-gray-100 text-gray-600"
-          } hover:bg-gray-200`}
+              ? "bg-secondary text-secondary"
+              : "bg-light text-dark"
+          } hover:bg-ui`}
         >
           {tag}
         </button>
@@ -45,7 +45,7 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="px-3 py-2 rounded-full border border-gray-300 bg-gray-100 text-gray-700 focus:outline-none"
+          className="px-3 py-2 rounded-full border border-ui bg-light text-dark focus:outline-none"
         >
           <option value="relevance">Most relevant</option>
           <option value="newest">Newest</option>
