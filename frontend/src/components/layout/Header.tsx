@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAutocompleteSuggestions } from "../../services/autocomplete";
+import { useAuth } from "../../context/AuthContext"; 
 
 const Header: React.FC = () => {
   const [q, setQ] = useState("");
@@ -12,6 +13,19 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const { currentUser } = useAuth(); // Access current user from context
+
+  const handleProfileClick = () => {
+    if (currentUser) {
+      // If we are "logged in", go to our profile
+      navigate(`/profile/${currentUser.id}`);
+    } else {
+      // In the future, this would go to the login page
+      // navigate("/login");
+      console.log("No user logged in");
+    }
+  };
 
   // Debounced autocomplete fetch
   useEffect(() => {
@@ -156,7 +170,7 @@ const Header: React.FC = () => {
         <button className="px-4 py-2 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-600 transition flex items-center">
           + Sell
         </button>
-        <button className="p-2 rounded-full hover:bg-gray-100 flex items-center">
+        <button onClick={handleProfileClick} className="p-2 rounded-full hover:bg-gray-100 flex items-center">
           <span className="material-icons">account_circle</span>
         </button>
       </div>
