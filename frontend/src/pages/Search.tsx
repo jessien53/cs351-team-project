@@ -72,6 +72,7 @@ const Search: React.FC = () => {
         title={p.title}
         price={p.price}
         user={p.user}
+        user_id={p.user_id}
         time={p.time}
       />
     ));

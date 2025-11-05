@@ -63,8 +63,7 @@ def search_view(request):
     page = int(request.GET.get("page", 1))
     per_page = int(request.GET.get("per_page", 12))
 
-    # Start with all active items
-    items = Item.objects.filter(is_active=True)
+    items = Item.objects.filter(is_active=True).select_related("seller_id")
 
     # Filter by search query (search in title)
     if query:
@@ -108,7 +107,8 @@ def search_view(request):
                 "id": str(item.item_id),
                 "title": item.title,
                 "price": f"${item.price}",
-                "user": "Anonymous",  # You'll want to add seller info from your user model
+                "user": item.seller_id.full_name or "Anonymous",
+                "user_id": str(item.seller_id.user_id),
                 "time": "1hr ago",  # You'll want to calculate this from created_at
                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
             }
