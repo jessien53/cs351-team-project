@@ -2,7 +2,7 @@
 from django.http import JsonResponse
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
-from .models import Item
+from .models import Item, Profile
 
 
 def autocomplete_view(request):
@@ -18,6 +18,38 @@ def autocomplete_view(request):
 
     return JsonResponse({"suggestions": suggestions})
 
+def profile_view(request, id):
+    """
+    Handle fetching a single user profile.
+    GET /api/profile/<id>/
+    """
+    try:
+        # Get the profile by its UUID
+        profile = Profile.objects.get(user_id=id)
+        
+        # Format the data for the frontend
+        profile_data = {
+            "user_id": profile.user_id,
+            "full_name": profile.full_name,
+            "avatar_url": profile.avatar_url,
+            "major": profile.major,
+            "is_verified": profile.is_verified,
+            "bio": profile.bio,
+            "items_sold": profile.items_sold,
+            "avg_response_time": profile.avg_response_time,
+            "followers_count": profile.followers_count,
+            "rating_average": float(profile.rating_average), # Convert Decimal
+            "rating_count": profile.rating_count,
+            "services": profile.services or [], # Handle null
+            "created_at": profile.created_at,
+        }
+        
+        return JsonResponse(profile_data)
+        
+    except Profile.DoesNotExist:
+        raise Http404("Profile not found")
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 def search_view(request):
     """
@@ -31,8 +63,7 @@ def search_view(request):
     page = int(request.GET.get("page", 1))
     per_page = int(request.GET.get("per_page", 12))
 
-    # Start with all active items
-    items = Item.objects.filter(is_active=True)
+    items = Item.objects.filter(is_active=True).select_related("seller_id")
 
     # Filter by search query (search in title)
     if query:
@@ -76,7 +107,8 @@ def search_view(request):
                 "id": str(item.item_id),
                 "title": item.title,
                 "price": f"${item.price}",
-                "user": "Anonymous",  # You'll want to add seller info from your user model
+                "user": item.seller_id.full_name or "Anonymous",
+                "user_id": str(item.seller_id.user_id),
                 "time": "1hr ago",  # You'll want to calculate this from created_at
                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
             }

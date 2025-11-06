@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAutocompleteSuggestions } from "../../services/autocomplete";
+import { useAuth } from "../../context/AuthContext"; 
 
 const Header: React.FC = () => {
   const [q, setQ] = useState("");
@@ -12,6 +13,23 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const { currentUser } = useAuth(); // Access current user from context
+
+  const handleProfileClick = () => {
+    if (currentUser) {
+      // If we are "logged in", go to our profile
+      navigate(`/profile/${currentUser.id}`);
+    } else {
+      // In the future, this would go to the login page
+      // navigate("/login");
+      console.log("No user logged in");
+    }
+  };
+
+  const handleLogoClick = () => {
+    navigate("/search");
+  };
 
   // Debounced autocomplete fetch
   useEffect(() => {
@@ -89,8 +107,15 @@ const Header: React.FC = () => {
 
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
-      <div className="flex items-center gap-3">
-        <button className="p-2 rounded hover:bg-gray-100 flex items-center bg-gray-200">
+      <div
+        className="flex items-center gap-3 cursor-pointer" // Added cursor-pointer
+        onClick={handleLogoClick} // Added onClick
+      >
+        <button
+          className="p-2 rounded hover:bg-gray-100 flex items-center bg-gray-200 pointer-events-none"
+          tabIndex={-1} // Make it non-focusable
+        >
+          {/* Added pointer-events-none so it doesn't intercept the div's click */}
           <span className="material-icons">apps</span>
         </button>
         <span className="text-xl font-bold text-gray-800">CampusMarket</span>
@@ -156,7 +181,7 @@ const Header: React.FC = () => {
         <button className="px-4 py-2 bg-primary text-white rounded-full font-semibold hover:bg-blue-600 transition flex items-center">
           + Sell
         </button>
-        <button className="p-2 rounded-full hover:bg-gray-100 flex items-center">
+        <button onClick={handleProfileClick} className="p-2 rounded-full hover:bg-gray-100 flex items-center">
           <span className="material-icons">account_circle</span>
         </button>
       </div>

@@ -3,6 +3,7 @@ export interface Product {
   title: string;
   price: string; // string with currency (e.g. "$40")
   user: string;
+  user_id: string;
   time: string; // human readable time (e.g. "2hrs ago")
   image?: string;
 }

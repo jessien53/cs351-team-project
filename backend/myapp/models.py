@@ -2,12 +2,35 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import uuid
 
+class Profile(models.Model):
+    user_id = models.UUIDField(primary_key=True, db_column="user_id", editable=False)
+    full_name = models.TextField(null=True, blank=True)
+    avatar_url = models.TextField(null=True, blank=True)
+    major = models.TextField(null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+    bio = models.TextField(null=True, blank=True)
+    items_sold = models.IntegerField(default=0)
+    avg_response_time = models.TextField(null=True, blank=True)
+    followers_count = models.IntegerField(default=0)
+    rating_average = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
+    rating_count = models.IntegerField(default=0)
+    services = models.JSONField(null=True, blank=True) # For services like Tutoring
+    created_at = models.DateTimeField(auto_now_add=False, null=True, blank=True)
 
+    class Meta:
+        managed = False  # Don't let Django manage Supabase schema
+        db_table = "profiles"
+
+    def __str__(self):
+        return self.full_name or str(self.user_id)
+    
 class Item(models.Model):
     item_id = models.UUIDField(
         primary_key=True, db_column="item_id", default=uuid.uuid4, editable=False
     )
-    seller_id = models.UUIDField(db_column="seller_id")
+    seller_id = models.ForeignKey(
+        Profile, on_delete=models.DO_NOTHING, db_column="seller_id"
+    )
     title = models.CharField(max_length=200)
     description = models.TextField()
     category_id = models.UUIDField(db_column="category_id")
@@ -98,3 +121,4 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
