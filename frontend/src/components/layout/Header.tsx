@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAutocompleteSuggestions } from "../../services/autocomplete";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
+import logo from "../../assets/Logo.png";
 
 const Header: React.FC = () => {
   const [q, setQ] = useState("");
@@ -28,7 +29,7 @@ const Header: React.FC = () => {
   };
 
   const handleLogoClick = () => {
-    navigate("/search");
+    navigate("/");
   };
 
   // Debounced autocomplete fetch
@@ -106,19 +107,15 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
+    <header className="flex items-center justify-between px-8 py-4 bg-primary shadow-sm">
       <div
         className="flex items-center gap-3 cursor-pointer" // Added cursor-pointer
         onClick={handleLogoClick} // Added onClick
       >
-        <button
-          className="p-2 rounded hover:bg-gray-100 flex items-center bg-gray-200 pointer-events-none"
-          tabIndex={-1} // Make it non-focusable
-        >
-          {/* Added pointer-events-none so it doesn't intercept the div's click */}
-          <span className="material-icons">apps</span>
-        </button>
-        <span className="text-xl font-bold text-gray-800">CampusMarket</span>
+        <div className="pointer-events-none bg-accent p-1 rounded hover:bg-gray-100 flex items-center">
+          <img src={logo} alt="CampusMarket Logo" width={40} height={40} />
+        </div>
+        <span className="text-xl font-bold text-accent">CampusMarket</span>
       </div>
       <div className="flex-1 mx-8 max-w-xl relative">
         <input
@@ -134,7 +131,7 @@ const Header: React.FC = () => {
           }}
           type="text"
           placeholder="Search"
-          className="w-full px-4 py-2 rounded-full border border-gray-300 bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="w-full px-4 py-2 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-accent text-dark"
         />
 
         {/* Autocomplete Dropdown */}
@@ -154,7 +151,7 @@ const Header: React.FC = () => {
                   onClick={() => handleSuggestionClick(suggestion)}
                   className={`px-4 py-3 cursor-pointer transition-colors ${
                     index === selectedIndex
-                      ? "bg-purple-50 text-purple-700"
+                      ? "bg-accent text-secondary"
                       : "hover:bg-gray-50"
                   }`}
                   onMouseEnter={() => setSelectedIndex(index)}
@@ -172,17 +169,22 @@ const Header: React.FC = () => {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <button className="p-2 rounded-full hover:bg-gray-100 flex items-center">
-          <span className="material-icons">favorite_border</span>
+        <button className="p-2 rounded-full hover:bg-accent flex items-center">
+          <span className="material-icons text-secondary">favorite_border</span>
         </button>
-        <button className="p-2 rounded-full hover:bg-gray-100 flex items-center">
-          <span className="material-icons">chat_bubble_outline</span>
+        <button className="p-2 rounded-full hover:bg-accent flex items-center">
+          <span className="material-icons text-secondary">
+            chat_bubble_outline
+          </span>
         </button>
-        <button className="px-4 py-2 bg-primary text-white rounded-full font-semibold hover:bg-blue-600 transition flex items-center">
+        <button className="px-4 py-2 bg-secondary text-accent rounded-full font-semibold hover:bg-accent hover:text-secondary transition flex items-center">
           + Sell
         </button>
-        <button onClick={handleProfileClick} className="p-2 rounded-full hover:bg-gray-100 flex items-center">
-          <span className="material-icons">account_circle</span>
+        <button
+          onClick={handleProfileClick}
+          className="p-2 rounded-full hover:bg-accent flex items-center"
+        >
+          <span className="material-icons text-secondary">account_circle</span>
         </button>
       </div>
     </header>

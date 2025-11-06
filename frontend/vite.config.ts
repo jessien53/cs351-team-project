@@ -6,5 +6,11 @@ import { resolve } from 'path';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  envDir: resolve(__dirname, '../..')
+  envDir: resolve(__dirname, '../..'),
+  server: {
+    watch: {
+      usePolling: true
+    }
+  }
 })
+

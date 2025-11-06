@@ -23,7 +23,7 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
 
   return (
     <div className="flex items-center gap-2 px-8 py-4 bg-light border-b border-ui">
-      <button className="px-4 py-2 bg-ui rounded-full font-medium text-dark hover:bg-ui">
+      <button className="px-4 py-2 bg-primary rounded-full font-medium text-dark hover:bg-ui hover:text-light">
         Show filters
       </button>
 

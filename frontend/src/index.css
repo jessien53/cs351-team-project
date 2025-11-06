@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #ff1053;
-  --color-secondary: #153243;
-  --color-accent: #98dfea;
-  --color-light: #f5f5f5;
-  --color-dark: #1f2937;
-  --color-ui: #5e3023;
+  --color-primary: #ff1053; /* CampusMarket Red */
+  --color-secondary: #153243; /* Deep Blue */
+  --color-accent: #98dfea; /* Light Blue */
+  --color-light: #f5f5f5; /* Light Gray */
+  --color-dark: #1f2937; /* Dark Gray */
+  --color-ui: #5e3023; /* UI Color */
 }
