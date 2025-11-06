@@ -79,7 +79,7 @@ const Search: React.FC = () => {
   }, [loading, results]);
 
   return (
-    <div className="min-h-screen bg-light">
+    <div className="min-h-screen bg-white">
       <Header />
       <FilterBar
         tags={tags}
