@@ -22,8 +22,8 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 px-8 py-4 bg-white border-b border-ui">
-      <button className="px-4 py-2 bg-primary rounded-full font-medium text-secondary hover:text-accent">
+    <div className="flex items-center gap-2 px-8 py-4 bg-light border-b border-ui">
+      <button className="px-4 py-2 bg-primary rounded-full font-medium text-dark hover:bg-ui hover:text-light">
         Show filters
       </button>
 
@@ -32,8 +32,10 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
           key={tag}
           onClick={() => toggleTag(tag)}
           className={`px-4 py-2 rounded-full font-medium ${
-            tags.includes(tag) ? "bg-light text-primary" : "text-dark"
-          } hover:bg-light `}
+            tags.includes(tag)
+              ? "bg-secondary text-secondary"
+              : "bg-light text-dark"
+          } hover:bg-ui`}
         >
           {tag}
         </button>

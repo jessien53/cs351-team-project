@@ -172,11 +172,12 @@ const Header: React.FC = () => {
         <button className="p-2 rounded-full hover:bg-accent flex items-center">
           <span className="material-icons text-secondary">favorite_border</span>
         </button>
+        {/* Chat Button - Currently Disabled
         <button className="p-2 rounded-full hover:bg-accent flex items-center">
-          <span className="material-icons text-secondary">
+          <span className="material-icons text-secondary ">
             chat_bubble_outline
           </span>
-        </button>
+        </button> */}
         <button className="px-4 py-2 bg-secondary text-accent rounded-full font-semibold hover:bg-accent hover:text-secondary transition flex items-center">
           + Sell
         </button>
