@@ -33,9 +33,9 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
           onClick={() => toggleTag(tag)}
           className={`px-4 py-2 rounded-full font-medium ${
             tags.includes(tag)
-              ? "bg-secondary text-secondary"
+              ? "bg-secondary text-accent"
               : "bg-light text-dark"
-          } hover:bg-ui`}
+          } hover:bg-accent hover:text-dark`}
         >
           {tag}
         </button>
