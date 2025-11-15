@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
 from .models import Item, Profile
+from time import localtime
 
 
 def autocomplete_view(request):
@@ -18,6 +19,7 @@ def autocomplete_view(request):
 
     return JsonResponse({"suggestions": suggestions})
 
+
 def profile_view(request, id):
     """
     Handle fetching a single user profile.
@@ -26,7 +28,7 @@ def profile_view(request, id):
     try:
         # Get the profile by its UUID
         profile = Profile.objects.get(user_id=id)
-        
+
         # Format the data for the frontend
         profile_data = {
             "user_id": profile.user_id,
@@ -38,18 +40,19 @@ def profile_view(request, id):
             "items_sold": profile.items_sold,
             "avg_response_time": profile.avg_response_time,
             "followers_count": profile.followers_count,
-            "rating_average": float(profile.rating_average), # Convert Decimal
+            "rating_average": float(profile.rating_average),  # Convert Decimal
             "rating_count": profile.rating_count,
-            "services": profile.services or [], # Handle null
+            "services": profile.services or [],  # Handle null
             "created_at": profile.created_at,
         }
-        
+
         return JsonResponse(profile_data)
-        
+
     except Profile.DoesNotExist:
         raise Http404("Profile not found")
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 def search_view(request):
     """
@@ -109,8 +112,8 @@ def search_view(request):
                 "price": f"${item.price}",
                 "user": item.seller_id.full_name or "Anonymous",
                 "user_id": str(item.seller_id.user_id),
-                "time": "1hr ago",  # You'll want to calculate this from created_at
-                "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+                "time": "1 hr ago",
+                "thumbnail_url": item.thumbnail_url,
             }
         )
 

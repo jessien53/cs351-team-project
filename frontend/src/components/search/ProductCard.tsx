@@ -7,6 +7,7 @@ interface ProductCardProps {
   user: string;
   user_id: string;
   time: string;
+  thumbnail_url: string;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -15,6 +16,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   user,
   user_id, // Destructure user_id
   time,
+  thumbnail_url,
 }) => {
   const navigate = useNavigate(); // Get the navigate function
 
@@ -24,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     navigate(`/profile/${user_id}`);
   };
 
-  const handleUserCardClick = (e: React.MouseEvent) => {
+  const handleUserCardClick = () => {
     navigate(`/listing`);
   };
 
@@ -34,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       onClick={handleUserCardClick}
     >
       <img
-        src="https://placehold.co/800"
+        src={thumbnail_url}
         alt={title}
         className="bg-ui rounded-t-lg object-cover h-48 w-full"
       />

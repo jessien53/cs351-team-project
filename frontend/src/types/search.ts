@@ -5,7 +5,7 @@ export interface Product {
   user: string;
   user_id: string;
   time: string; // human readable time (e.g. "2hrs ago")
-  image?: string;
+  thumbnail_url: string;
 }
 
 export type SortOption = 'relevance' | 'newest' | 'price_asc' | 'price_desc';

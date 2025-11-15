@@ -74,6 +74,7 @@ const Search: React.FC = () => {
         user={p.user}
         user_id={p.user_id}
         time={p.time}
+        thumbnail_url={p.thumbnail_url}
       />
     ));
   }, [loading, results]);
