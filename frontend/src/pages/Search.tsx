@@ -45,7 +45,7 @@ const Search: React.FC = () => {
     fetchResults();
   }, [fetchResults]);
 
-  // keep query in sync if the URL changes (e.g., user used header search)
+  // keep query in sync if the URL changes (user used header search)
   useEffect(() => {
     const qFromUrl = new URLSearchParams(location.search).get("q") || "";
     if (qFromUrl !== query) setQuery(qFromUrl);
@@ -69,11 +69,13 @@ const Search: React.FC = () => {
     return results.map((p, i) => (
       <ProductCard
         key={p.id ?? i}
+        id={p.id}
         title={p.title}
         price={p.price}
         user={p.user}
         user_id={p.user_id}
         time={p.time}
+        image={p.image}
       />
     ));
   }, [loading, results]);

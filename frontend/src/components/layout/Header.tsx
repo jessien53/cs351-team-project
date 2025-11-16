@@ -1,4 +1,3 @@
-// frontend/src/components/layout/Header.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAutocompleteSuggestions } from "../../services/autocomplete";
@@ -45,7 +44,7 @@ const Header: React.FC = () => {
         setSuggestions([]);
         setShowSuggestions(false);
       }
-    }, 300); // 300ms debounce
+    }, 300)
 
     return () => clearTimeout(timer);
   }, [q]);

@@ -1,4 +1,3 @@
-// frontend/src/types/profile.ts
 export interface ProfileService {
   name: string;
   description: string;

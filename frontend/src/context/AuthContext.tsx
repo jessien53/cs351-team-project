@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 const MOCK_USER = {
   id: "b8df5a8b-316d-4db1-b3b9-56745f9c8517",
   full_name: "Emily Allen",
-  // Can add more fields here if needed
 };
 
 // Define the shape of the context

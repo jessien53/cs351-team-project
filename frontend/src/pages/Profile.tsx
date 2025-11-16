@@ -1,4 +1,3 @@
-// frontend/src/pages/Profile.tsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/layout/Header";
@@ -102,7 +101,7 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // Render the full profile based on your wireframe
+  // Render the full profile
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -180,14 +179,12 @@ const ProfilePage: React.FC = () => {
                 Services Provided
               </h2>
               <div className="space-y-4">
-                {/* This maps over the JSON data */}
                 {profile.services.map((service, index) => (
                   <div
                     key={index}
                     className="flex items-center p-4 bg-gray-50 rounded-lg border border-gray-200"
                   >
                     <div className="p-3 bg-white rounded-lg shadow-sm border border-gray-100 mr-4">
-                      {/* Simple icon logic based on name */}
                       {service.name.toLowerCase().includes("tutor") ? (
                         <BookOpen className="text-blue-600" />
                       ) : (

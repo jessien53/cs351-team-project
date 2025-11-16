@@ -1,8 +1,8 @@
 # from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
-from .models import Item, Profile
+from .models import Item, Profile, Category
 
 
 def autocomplete_view(request):
@@ -11,7 +11,7 @@ def autocomplete_view(request):
 
     if query:
         suggestions = autocomplete_trie.get_suggestions(query)
-        # Optional: limit the number of suggestions
+        # limit the number of suggestions
         suggestions = suggestions[:10]
     else:
         suggestions = []
@@ -50,6 +50,72 @@ def profile_view(request, id):
         raise Http404("Profile not found")
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+def listing_view(request, item_id):
+    """
+    Handle fetching a single item by its ID.
+    GET /api/item/<uuid:item_id>/
+    """
+    try:
+        # Use select_related to join the seller profile in one query
+        item = Item.objects.select_related("seller_id").get(item_id=item_id)
+
+        # Get category name
+        category_name = "General" 
+        try:
+            category = Category.objects.get(category_id=item.category_id)
+            category_name = category.name
+        except Category.DoesNotExist:
+            pass  
+        
+        # Get seller data
+        seller_data = {}
+        if item.seller_id:
+            seller_data = {
+                "seller_id": str(item.seller_id.user_id),
+                "seller_name": item.seller_id.full_name,
+                "seller_major": item.seller_id.major,
+                "seller_rating": float(item.seller_id.rating_average),
+                "seller_sales": item.seller_id.items_sold,
+                "seller_avatar_url": item.seller_id.avatar_url,
+                "seller_is_verified": item.seller_id.is_verified,
+            }
+
+        # Format the item data for the frontend
+        item_data = {
+            "item_id": str(item.item_id),
+            "title": item.title,
+            "description": item.description,
+            "category_id": str(item.category_id),
+            "price": float(item.price), # Convert Decimal to float
+            "quantity_available": item.quantity_available,
+            "is_digital": item.is_digital,
+            "condition": item.condition,
+            "tags": item.tags or [],
+            "processing_time": item.processing_time,
+            "customizable": item.customizable,
+            "thumbnail_url": item.thumbnail_url,
+            "video_url": item.video_url,
+            "delivery_available": item.delivery_available,
+            "delivery_fee": float(item.delivery_fee) if item.delivery_fee is not None else None,
+            "shipping_available": item.shipping_available,
+            "total_sales": item.total_sales,
+            "views_count": item.views_count,
+            "favorites_count": item.favorites_count,
+            "rating_average": float(item.rating_average),
+            "rating_count": item.rating_count,
+            "status": item.status,
+            "created_at": item.created_at,
+            # Add seller data
+            **seller_data, 
+        }
+        
+        return JsonResponse(item_data)
+        
+    except Item.DoesNotExist:
+        return JsonResponse({"error": "Item not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 def search_view(request):
     """
@@ -73,13 +139,24 @@ def search_view(request):
     if tags:
         tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
         if tag_list:
+            # Find category UUIDs that match the tag names
+            category_ids = list(
+                Category.objects.filter(name__in=tag_list).values_list(
+                    "category_id", flat=True
+                )
+            )
+
             tag_query = Q()
             for tag in tag_list:
-                tag_query |= (
-                    Q(tags__icontains=tag)
-                    | Q(category_id__iexact=tag)
-                    | Q(subcategory_id__iexact=tag)
+                # Search in text tags
+                tag_query |= Q(tags__icontains=tag)
+
+            # Also search for matching category or subcategory UUIDs
+            if category_ids:
+                tag_query |= Q(category_id__in=category_ids) | Q(
+                    subcategory_id__in=category_ids
                 )
+
             items = items.filter(tag_query)
 
     # Apply sorting

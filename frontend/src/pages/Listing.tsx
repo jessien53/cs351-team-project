@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Header from "../components/layout/Header";
 import ProductHeader from "../components/listing/productHeader";
 import ImageGallery from "../components/listing/imageGallery";
@@ -8,39 +9,87 @@ import Customizable from "../components/listing/customizable";
 import Purchase from "../components/listing/purchase";
 import SellerCard from "../components/listing/sellerCard";
 import ListingDescription from "../components/listing/listingDescription";
+import type { Item } from "../types/listing";
+import { getListingById } from "../services/listing";
 
 const Listing: React.FC = () => {
-  const itemData = {
-    title: "Custom Double-Sided Engraved Pet ID Tag",
-    price: 10.27,
-    seller_id: "AmyEngravedGifts",
-    rating: 4.8,
-    ratingCount: 127,
-    condition: "New",
-    description: `Welcome to the world where your pet's identity shines as brightly as their personality! Our Free Engraved Dog Tag isn't just a tag; it's a statement of love, a whisper of care, and a promise of safety for your beloved pet. Handcrafted with precision and passion, this custom metal collar tag is a beautiful blend of functionality and aesthetic charm, perfect for both dogs and cats.
-    
-    Add your pet's name, your contact details, or a special message on both sides in crisp, clear lettering. Keeping it clean is a breeze—simply polish with a soft cloth to maintain its shine.
-    
-    It's the thoughtful choice for pet owners who cherish quality and want to keep their pets identified in style. Gift your pet this badge of love and enjoy the peace of mind that comes with it.`,
+  const { itemId } = useParams<{ itemId: string }>();
+  const [item, setItem] = useState<Item | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    category: "Pet Supplies",
-    subcategory: "Pet ID Tags",
-    tags: ["dogs", "cats", "pets", "personalized", "engraved", "jewelry"],
-    quantityAvailable: 5,
-    totalSales: 342,
-    viewsCount: 1849,
-    favoritesCount: 156,
-    processingTime: "3-5 business days",
-    customizable: true,
-    shippingAvailable: true,
-    deliveryAvailable: true,
-    deliveryFee: 5.99,
+  useEffect(() => {
+    if (!itemId) {
+      setError("No item ID provided.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchListing = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getListingById(itemId);
+        setItem(data);
+      } catch (err: any) {
+        setError(err.message || "Failed to fetch listing.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListing();
+  }, [itemId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col bg-white min-h-screen">
+        <Header />
+        <div className="text-center p-12">Loading listing...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col bg-white min-h-screen">
+        <Header />
+        <div className="text-center p-12 text-accent">{error}</div>
+      </div>
+    );
+  }
+
+  if (!item) {
+    return (
+      <div className="flex flex-col bg-white min-h-screen">
+        <Header />
+        <div className="text-center p-12">Listing not found.</div>
+      </div>
+    );
+  }
+
+  const listingPageData = {
+    title: item.title,
+    price: item.price,
+    seller_id: item.seller_name || item.seller_id,
+    rating: item.rating_average,
+    ratingCount: item.rating_count,
+    condition: item.condition || "N/A",
+    description: item.description,
+    category: item.category_name,
+    tags: item.tags,
+    quantityAvailable: item.quantity_available,
+    totalSales: item.total_sales,
+    viewsCount: item.views_count,
+    favoritesCount: item.favorites_count,
+    processingTime: item.processing_time || "N/A",
+    customizable: item.customizable,
+    shippingAvailable: item.shipping_available,
+    deliveryAvailable: item.delivery_available,
+    deliveryFee: item.delivery_fee || 0,
     images: [
-      "https://i.etsystatic.com/32516685/r/il/3e7fe8/5854275880/il_1588xN.5854275880_hic9.jpg",
-      "https://i.etsystatic.com/32516685/r/il/c8e78b/5835506020/il_1588xN.5835506020_hkvy.jpg",
-      "https://i.etsystatic.com/32516685/r/il/6254be/6176177250/il_1588xN.6176177250_oi1a.jpg",
-      "https://i.etsystatic.com/32516685/r/il/a4496a/5835506102/il_1588xN.5835506102_3tt2.jpg",
-    ],
+      item.thumbnail_url,
+    ].filter(Boolean) as string[], // Filter out null/undefined
   };
 
   return (
@@ -48,36 +97,35 @@ const Listing: React.FC = () => {
       <Header />
       <div className="flex flex-col lg:flex-row">
         {/* Left Side - Image Gallery */}
-        <ImageGallery images={itemData.images} />
+        <ImageGallery images={listingPageData.images} />
 
         {/* Right Side - Product Details */}
         <div className="lg:w-1/2 bg-white overflow-y-auto">
           <div className="max-w-2xl mx-auto p-8 lg:p-12 space-y-8">
-            <ProductHeader itemData={itemData} />
+            <ProductHeader itemData={listingPageData} />
 
             <div className="border-y py-6 space-y-4">
-              {itemData.shippingAvailable && (
-                <Shipping processingTime={itemData.processingTime} />
+              {listingPageData.shippingAvailable && (
+                <Shipping processingTime={listingPageData.processingTime} />
               )}
 
-              {itemData.deliveryAvailable && (
-                <Delivery deliveryFee={itemData.deliveryFee} />
+              {listingPageData.deliveryAvailable && (
+                <Delivery deliveryFee={listingPageData.deliveryFee} />
               )}
 
-              {itemData.customizable && <Customizable />}
+              {listingPageData.customizable && <Customizable />}
             </div>
 
-            <Purchase itemData={itemData} />
+            <Purchase itemData={listingPageData} />
 
-            {/* Todo Grab actual seller data*/}
             <SellerCard
-              seller_id={itemData.seller_id}
-              totalSales={100}
-              major={"Music"}
-              rating={4.8}
+              seller_id={item.seller_name || item.seller_id}
+              totalSales={item.seller_sales}
+              major={item.seller_major || "N/A"}
+              rating={item.seller_rating}
             />
 
-            <ListingDescription itemData={itemData} />
+            <ListingDescription itemData={listingPageData} />
           </div>
         </div>
       </div>

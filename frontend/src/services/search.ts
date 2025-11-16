@@ -1,4 +1,3 @@
-// frontend/src/services/search.ts
 import type { SearchParams, SearchResponse } from "../types/search";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";

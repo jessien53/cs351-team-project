@@ -1,10 +1,10 @@
 export interface Product {
-  id?: number;
+  id?: string;
   title: string;
-  price: string; // string with currency (e.g. "$40")
+  price: string; // string with currency ("$40")
   user: string;
   user_id: string;
-  time: string; // human readable time (e.g. "2hrs ago")
+  time: string; // human readable time ("2hrs ago")
   image?: string;
 }
 
