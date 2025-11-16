@@ -1,20 +1,25 @@
 import React from "react";
 import { Verified } from "lucide-react";
 import logo from "../../assets/Logo.png";
+import { useNavigate } from "react-router-dom";
 
 interface SellerCardProps {
   seller_id: string;
   rating: number;
   totalSales: number;
   major: string;
+  user_id: string;
 }
 
 const SellerCard: React.FC<SellerCardProps> = ({
   seller_id,
+  user_id,
   rating,
   totalSales,
   major,
 }) => {
+  const navigate = useNavigate();
+  
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
       <div className="flex items-center gap-4 mb-4">
@@ -46,7 +51,9 @@ const SellerCard: React.FC<SellerCardProps> = ({
           <div className="text-xs text-gray-600">Major</div>
         </div>
       </div>
-      <button className="w-full bg-white border border-gray-300 py-3 rounded-lg font-medium hover:bg-gray-50 transition">
+      <button onClick={() => navigate(`/profile/${user_id}`)} // Navigate to profile on click
+        className="w-full bg-white border border-gray-300 py-3 rounded-lg font-medium hover:bg-gray-50 transition cursor-pointer"
+        >
         Visit Shop
       </button>
     </div>

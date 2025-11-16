@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/layout/Header";
-import { getProfileById } from "../services/profile";
+import { getProfileById, getProfileListings } from "../services/profile";
 import type { Profile } from "../types/profile";
+import type { Product } from "../types/search"; 
+import ProductCard from "../components/search/ProductCard"; 
 import {
   Star,
   Award,
@@ -15,6 +17,7 @@ import {
   BookOpen,
   Video,
   ChevronRight,
+  Store,
 } from "lucide-react";
 
 // Helper to format the "Member Since" date
@@ -48,6 +51,7 @@ const StatBox: React.FC<{
 const ProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [listings, setListings] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,20 +62,26 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getProfileById(id);
-        setProfile(data);
+        // Fetch both profile and listings in parallel
+        const [profileData, listingsData] = await Promise.all([
+          getProfileById(id),
+          getProfileListings(id),
+        ]);
+        
+        setProfile(profileData);
+        setListings(listingsData);
       } catch (err: any) {
-        setError(err.message || "Failed to fetch profile.");
+        setError(err.message || "Failed to fetch data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -107,7 +117,7 @@ const ProfilePage: React.FC = () => {
       <Header />
       <main className="max-w-4xl mx-auto p-8">
         <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
-          {/* --- Profile Header --- */}
+          {/* Profile Header */}
           <div className="p-8 bg-gray-100">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6">
               <img
@@ -137,19 +147,19 @@ const ProfilePage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3">
+              {/* <div className="flex flex-col sm:flex-row gap-3">
                 <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-gray-800 hover:bg-gray-50">
                   <Save size={16} /> Save
                 </button>
                 <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
                   <MessageCircle size={16} /> Message
                 </button>
-              </div>
+              </div> */}
             </div>
             <p className="text-gray-700 mt-6">{profile.bio}</p>
           </div>
 
-          {/* --- Stats & Services --- */}
+          {/* Stats & Services */}
           <div className="p-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatBox
@@ -214,6 +224,35 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
+        {/* Listings */}
+        <div className="mt-10">
+          <div className="flex items-center gap-2 mb-6">
+            <Store className="text-primary" />
+            <h2 className="text-2xl font-bold text-gray-900">Active Listings</h2>
+          </div>
+          
+          {listings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {listings.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.title}
+                  price={product.price}
+                  user={product.user}
+                  user_id={product.user_id}
+                  time={product.time}
+                  image={product.image}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300 text-gray-500">
+              No active listings found for this user.
+            </div>
+          )}
+        </div>
+
       </main>
     </div>
   );

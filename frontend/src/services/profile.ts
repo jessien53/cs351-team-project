@@ -1,4 +1,5 @@
 import type { Profile } from "../types/profile";
+import type { Product } from "../types/search";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
@@ -18,4 +19,20 @@ export async function getProfileById(id: string): Promise<Profile> {
 
   const data = await res.json();
   return data as Profile;
+}
+
+export async function getProfileListings(id: string): Promise<Product[]> {
+  const url = `${API_BASE}/api/profile/${id}/listings/`;
+
+  const res = await fetch(url, {
+    headers: { "Accept": "application/json" },
+  });
+
+  if (!res.ok) {
+    console.error(`Failed to fetch listings: ${res.statusText}`);
+    return [];
+  }
+
+  const data = await res.json();
+  return data.results || [];
 }

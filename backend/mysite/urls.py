@@ -17,7 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from myapp.views import autocomplete_view, search_view, profile_view, listing_view
+from myapp.views import (
+    autocomplete_view,
+    search_view,
+    profile_view,
+    listing_view,
+    profile_listings_view,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,4 +31,9 @@ urlpatterns = [
     path("api/search/", search_view, name="search"),
     path("api/profile/<uuid:id>/", profile_view, name="profile"),
     path("api/item/<uuid:item_id>/", listing_view, name="listing"),
+    path(
+        "api/profile/<uuid:seller_id>/listings/",
+        profile_listings_view,
+        name="profile_listings",
+    ),
 ]

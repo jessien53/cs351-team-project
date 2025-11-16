@@ -119,10 +119,11 @@ const Listing: React.FC = () => {
             <Purchase itemData={listingPageData} />
 
             <SellerCard
-              seller_id={item.seller_name || item.seller_id}
-              totalSales={item.seller_sales}
+              seller_id={item.seller_name || "Anonymous"} // Display Name
+              user_id={item.seller_id} // Pass the actual UUID here
               major={item.seller_major || "N/A"}
               rating={item.seller_rating}
+              totalSales={item.total_sales}
             />
 
             <ListingDescription itemData={listingPageData} />

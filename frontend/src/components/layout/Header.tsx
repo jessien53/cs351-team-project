@@ -168,16 +168,17 @@ const Header: React.FC = () => {
         )}
       </div>
       <div className="flex items-center gap-4">
-        <button className="p-2 rounded-full hover:bg-accent flex items-center">
+        {/* <button className="p-2 rounded-full hover:bg-accent flex items-center">
           <span className="material-icons text-secondary">favorite_border</span>
-        </button>
+        </button> */}
         {/* Chat Button - Currently Disabled
         <button className="p-2 rounded-full hover:bg-accent flex items-center">
           <span className="material-icons text-secondary ">
             chat_bubble_outline
           </span>
         </button> */}
-        <button className="px-4 py-2 bg-secondary text-accent rounded-full font-semibold hover:bg-accent hover:text-secondary transition flex items-center">
+        <button onClick={() => navigate(`/create`)}
+        className="px-4 py-2 bg-secondary text-accent rounded-full font-semibold hover:bg-accent hover:text-secondary transition flex items-center">
           + Sell
         </button>
         <button

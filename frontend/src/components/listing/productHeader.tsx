@@ -4,7 +4,6 @@ const ProductHeader: React.FC<{ itemData: any }> = ({ itemData }) => (
   <div>
     <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
       <span>{itemData.category}</span>
-      <span>›</span>
       <span>{itemData.subcategory}</span>
     </div>
     <h1 className="text-4xl lg:text-5xl font-bold text-dark mb-4 leading-tight">

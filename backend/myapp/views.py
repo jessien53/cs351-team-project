@@ -200,3 +200,28 @@ def search_view(request):
         },
         json_dumps_params={"indent": 2},
     )
+
+def profile_listings_view(request, seller_id):
+    """
+    GET /api/profile/<seller_id>/listings/
+    Fetch all active items for a specific seller.
+    """
+    try:
+        # Filter items by the seller's UUID
+        items = Item.objects.filter(seller_id=seller_id, is_active=True).select_related("seller_id").order_by("-created_at")
+        
+        results = []
+        for item in items:
+            results.append({
+                "id": str(item.item_id),
+                "title": item.title,
+                "price": f"${item.price}",
+                "user": item.seller_id.full_name or "Anonymous",
+                "user_id": str(item.seller_id.user_id),
+                "time": "1hr ago", # TODO: calculate from created_at
+                "image": item.thumbnail_url,
+            })
+            
+        return JsonResponse({"results": results})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
