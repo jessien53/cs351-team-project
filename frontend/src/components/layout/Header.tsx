@@ -108,13 +108,25 @@ const Header: React.FC = () => {
   return (
     <header className="flex items-center justify-between px-8 py-4 bg-primary shadow-sm">
       <div
-        className="flex items-center gap-3 cursor-pointer" // Added cursor-pointer
-        onClick={handleLogoClick} // Added onClick
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={handleLogoClick}
       >
         <div className="pointer-events-none bg-accent p-1 rounded hover:bg-gray-100 flex items-center">
           <img src={logo} alt="CampusMarket Logo" width={40} height={40} />
         </div>
-        <span className="text-xl font-bold text-accent">CampusMarket</span>
+        <span 
+          className="text-3xl font-bold text-accent"
+          style={{ 
+            textShadow: `
+              -1px -1px 0 var(--color-secondary),  
+               1px -1px 0 var(--color-secondary),
+              -1px  1px 0 var(--color-secondary),
+               1px  1px 0 var(--color-secondary)
+            `, 
+            fontFamily: "'Quicksand', sans-serif" }}
+        >
+          CampusMarket
+        </span>
       </div>
       <div className="flex-1 mx-8 max-w-xl relative">
         <input
