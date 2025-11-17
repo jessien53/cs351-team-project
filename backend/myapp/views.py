@@ -3,7 +3,10 @@ from django.http import JsonResponse, Http404
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
 from .models import Item, Profile, Category
-
+import json
+import uuid
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 def autocomplete_view(request):
     # Get the 'q' parameter from the URL (e.g., /api/autocomplete/?q=comp)
@@ -226,3 +229,109 @@ def profile_listings_view(request, seller_id):
         return JsonResponse({"results": results})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def add_listing(request):
+    """
+    POST /api/listings/create/
+    creates a new item listing from JSON data.
+    """
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid moethod type just be of type POST"})
+    
+    try: 
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"error": "Invalid JSON"}, status = 400)
+    
+    required_fields = [
+        "seller_id", "title", "description", 
+        "category_id", "price", "thumbnail_url"
+    ]
+
+    missing = [field for field in required_fields if field not in data]
+
+    #check if missing any fields
+    if missing:
+        return JsonResponse({"error": f"Missing required fields: {', '.join(missing)}"}, status = 400)
+    
+    #validate seller
+    try:
+        seller = Profile.objects.get(user_id = data["seller_id"])
+    except Exception:
+        return JsonResponse({"error": "Invalid seller_id"})
+
+
+    #perform the fetch
+    try: 
+        item = Item.objects.create(
+            item_id = uuid.uuid4(),
+            seller_id = seller,
+            title=data["title"],
+            description=data["description"],
+            category_id = data["category_id"],
+            subcategory_id=data.get("subcategory_id"),
+            price=data["price"],
+            quantity_available=data.get("quantity_available", 1),
+            is_digital=data.get("is_digital", False),
+            condition=data.get("condition"),
+            tags=data.get("tags", []),
+            processing_time = data.get("processing_time"),
+            customizable=data.get("customizable", False),
+            thumbnail_url=data["thumbnail_url"],
+            video_url=data.get("video_url"),
+            delivery_available=data.get("delivery_available", False),
+            delivery_radius=data.get("delivery_radius"),
+            delivery_fee=data.get("delivery_fee"),
+            shipping_available=data.get("shipping_available", False),
+            status=data.get("status", "active"),
+            is_active=True,
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+            published_at=timezone.now(),
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+    seller_data = {
+                "seller_id": str(item.seller_id.user_id),
+                "seller_name": item.seller_id.full_name,
+                "seller_major": item.seller_id.major,
+                "seller_rating": float(item.seller_id.rating_average),
+                "seller_sales": item.seller_id.items_sold,
+                "seller_avatar_url": item.seller_id.avatar_url,
+                "seller_is_verified": item.seller_id.is_verified,
+            }
+
+    # Format the item data for the frontend
+    item_data = {
+        "item_id": str(item.item_id),
+        "title": item.title,
+        "description": item.description,
+        "category_id": str(item.category_id),
+        "price": float(item.price), # Convert Decimal to float
+        "quantity_available": item.quantity_available,
+        "is_digital": item.is_digital,
+        "condition": item.condition,
+        "tags": item.tags or [],
+        "processing_time": item.processing_time,
+        "customizable": item.customizable,
+        "thumbnail_url": item.thumbnail_url,
+        "video_url": item.video_url,
+        "delivery_available": item.delivery_available,
+        "delivery_fee": float(item.delivery_fee) if item.delivery_fee is not None else None,
+        "shipping_available": item.shipping_available,
+        "total_sales": item.total_sales,
+        "views_count": item.views_count,
+        "favorites_count": item.favorites_count,
+        "rating_average": float(item.rating_average),
+        "rating_count": item.rating_count,
+        "status": item.status,
+        "created_at": item.created_at,
+        # Add seller data
+        **seller_data, 
+    }
+
+    return JsonResponse(item_data, status=201)
+
