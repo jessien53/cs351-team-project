@@ -6,6 +6,8 @@ import type {
   ListingFormData,
   ListingStatus,
 } from "../types/create.ts";
+import Delivery from "../components/listing/delivery.tsx";
+import { addListing } from "../services/addListing.ts";
 
 // Static data can live here or be imported from a constants file
 const categories = [
@@ -56,11 +58,18 @@ const Create = () => {
   };
 
   // Handler for the final submission
-  const handleSubmit = (status: ListingStatus) => {
-    const finalData = { ...formData, status };
+  const handleSubmit = async (status: ListingStatus) => {
+    
     // TODO: Add your submission logic here (e.g., API call)
-    console.log("Submitting Listing:", finalData);
-    console.log("With Images:", images);
+    try {
+      const finalData = { ...formData, status };
+      const res = await addListing(finalData);
+      console.log("Submitting Listing:", res);
+      console.log("With Images:", images);
+    }
+    catch(err:any){
+      console.error(err);
+    }
   };
 
   return (

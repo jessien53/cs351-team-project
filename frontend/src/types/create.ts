@@ -3,6 +3,11 @@ export interface ImageObject {
   url: string;
   file: File;
 }
+export interface SellerInfo {
+  id: string;
+  name: string;
+  avatar_url?: string | null;
+}
 
 export type ListingStatus = "draft" | "active";
 
@@ -23,4 +28,16 @@ export interface ListingFormData {
   deliveryFee: string;
   shippingAvailable: boolean;
   status: ListingStatus;
+}
+
+export interface ListingResponse {
+  item_id: string;
+  title: string;
+  description: string;
+  category_id: string;
+  price: number;
+  quantity_available: number;
+  status: "draft" | "active" | "paused" | "sold_out" | "archived";
+  thumbnail_url: string;
+  seller: SellerInfo | null;
 }
