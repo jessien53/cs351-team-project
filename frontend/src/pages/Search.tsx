@@ -74,6 +74,7 @@ const Search: React.FC = () => {
         price={p.price}
         user={p.user}
         user_id={p.user_id}
+        avatar_url={p.user_avatar}
         time={p.time}
         image={p.image}
       />

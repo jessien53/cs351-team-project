@@ -186,6 +186,7 @@ def search_view(request):
                 "price": f"${item.price}",
                 "user": item.seller_id.full_name or "Anonymous",
                 "user_id": str(item.seller_id.user_id),
+                "user_avatar": item.seller_id.avatar_url,
                 "time": "1hr ago",  # You'll want to calculate this from created_at
                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
             }

@@ -4,6 +4,7 @@ export interface Product {
   price: string; // string with currency ("$40")
   user: string;
   user_id: string;
+  user_avatar?: string | null;
   time: string; // human readable time ("2hrs ago")
   image?: string;
 }

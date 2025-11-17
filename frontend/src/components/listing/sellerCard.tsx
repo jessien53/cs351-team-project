@@ -7,6 +7,7 @@ interface SellerCardProps {
   seller_id: string;
   rating: number;
   totalSales: number;
+  avatar_url?: string | null;
   major: string;
   user_id: string;
 }
@@ -15,6 +16,7 @@ const SellerCard: React.FC<SellerCardProps> = ({
   seller_id,
   user_id,
   rating,
+  avatar_url,
   totalSales,
   major,
 }) => {
@@ -23,9 +25,8 @@ const SellerCard: React.FC<SellerCardProps> = ({
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
       <div className="flex items-center gap-4 mb-4">
-        {/*temp fake photo*/}
         <img
-          src={logo}
+          src={avatar_url || logo}
           className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"
         />
 

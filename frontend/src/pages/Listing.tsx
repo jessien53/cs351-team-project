@@ -121,6 +121,7 @@ const Listing: React.FC = () => {
             <SellerCard
               seller_id={item.seller_name || "Anonymous"} // Display Name
               user_id={item.seller_id} // Pass the actual UUID here
+              avatar_url={item.seller_avatar_url}
               major={item.seller_major || "N/A"}
               rating={item.seller_rating}
               totalSales={item.total_sales}

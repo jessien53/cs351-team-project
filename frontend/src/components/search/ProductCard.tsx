@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../../assets/logo.png";
 
 interface ProductCardProps {
   id?: string;
@@ -7,6 +8,7 @@ interface ProductCardProps {
   price: string;
   user: string;
   user_id: string;
+  avatar_url?: string | null;
   time: string;
   image?: string;
 }
@@ -17,6 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   price,
   user,
   user_id,
+  avatar_url,
   time,
   image,
 }) => {
@@ -52,10 +55,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
           className="flex items-center text-sm text-dark mt-auto cursor-pointer"
           onClick={handleUserProfileClick}
         >
-          <span className="w-6 h-6 bg-ui rounded-full mr-2 inline-block" />
+          <img 
+            src={avatar_url || logo} 
+            className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mr-2 object-cover"
+          />
           <span className="hover:underline">{user}</span>{" "}
-          <span className="mx-2">•</span>
-          {time}
+          {/* <span className="mx-2">•</span>
+          {time} */}
         </div>
       </div>
     </div>
