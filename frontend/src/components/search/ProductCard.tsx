@@ -60,8 +60,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mr-2 object-cover"
           />
           <span className="hover:underline">{user}</span>{" "}
-          {/* <span className="mx-2">•</span>
-          {time} */}
+          <span className="mx-2">•</span>
+          {time}
         </div>
       </div>
     </div>

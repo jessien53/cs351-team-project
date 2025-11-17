@@ -10,6 +10,46 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import uuid
 from time import localtime
+from datetime import datetime, timedelta
+
+
+def get_relative_time(dt):
+    """
+    Convert a datetime to a human-readable relative time string.
+    E.g., '2hrs ago', '3 days ago', '1 week ago', etc.
+    """
+    if dt is None:
+        return "Unknown"
+
+    # Make dt timezone-aware if it isn't already
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+
+    now = timezone.now()
+    diff = now - dt
+
+    seconds = diff.total_seconds()
+
+    if seconds < 60:
+        return "Just now"
+    elif seconds < 3600:  # Less than 1 hour
+        mins = int(seconds / 60)
+        return f"{mins}min{'s' if mins != 1 else ''} ago"
+    elif seconds < 86400:  # Less than 1 day
+        hours = int(seconds / 3600)
+        return f"{hours}hr{'s' if hours != 1 else ''} ago"
+    elif seconds < 604800:  # Less than 1 week
+        days = int(seconds / 86400)
+        return f"{days} day{'s' if days != 1 else ''} ago"
+    elif seconds < 2592000:  # Less than 30 days
+        weeks = int(seconds / 604800)
+        return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+    elif seconds < 31536000:  # Less than 1 year
+        months = int(seconds / 2592000)
+        return f"{months} month{'s' if months != 1 else ''} ago"
+    else:
+        years = int(seconds / 31536000)
+        return f"{years} year{'s' if years != 1 else ''} ago"
 
 
 def autocomplete_view(request):
@@ -199,7 +239,7 @@ def search_view(request):
                 "user": item.seller_id.full_name or "Anonymous",
                 "user_id": str(item.seller_id.user_id),
                 "user_avatar": item.seller_id.avatar_url,
-                "time": "1hr ago",  # You'll want to calculate this from created_at
+                "time": get_relative_time(item.created_at),
                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
             }
         )
@@ -281,8 +321,11 @@ def create_listing_view(request):
                     else [tag.strip() for tag in tags.split(",")]
                 )
             except json.JSONDecodeError:
-                tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-        else:
+                # If it's just a plain string, make it a list
+                tags = [tags] if tags else []
+
+        # Ensure it's a list
+        if not isinstance(tags, list):
             tags = []
 
         # Create a new Item instance
