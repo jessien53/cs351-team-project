@@ -4,3 +4,4 @@ python-dotenv
 dotenv
 django-cors-headers
 requests
+supabase

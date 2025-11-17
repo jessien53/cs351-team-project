@@ -23,6 +23,7 @@ from myapp.views import (
     profile_view,
     listing_view,
     profile_listings_view,
+    create_listing_view,
 )
 
 urlpatterns = [
@@ -36,4 +37,5 @@ urlpatterns = [
         profile_listings_view,
         name="profile_listings",
     ),
+    path("api/listings/create/", create_listing_view, name="create_listing"),
 ]

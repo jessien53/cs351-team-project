@@ -22,7 +22,12 @@ const ShippingDelivery: React.FC<Props> = ({ formData, onFormChange }) => {
               }
               className="w-5 h-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 mt-0.5"
             />
-            {/* ... label text ... */}
+            <div>
+              <div className="font-bold text-gray-900">Shipping Available</div>
+              <div className="text-sm text-gray-600">
+                Ship this item to buyers
+              </div>
+            </div>
           </label>
 
           {formData.shippingAvailable && (
@@ -52,7 +57,12 @@ const ShippingDelivery: React.FC<Props> = ({ formData, onFormChange }) => {
               }
               className="w-5 h-5 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 mt-0.5"
             />
-            {/* ... label text ... */}
+            <div>
+              <div className="font-bold text-gray-900">Local Delivery</div>
+              <div className="text-sm text-gray-600">
+                Offer local delivery option
+              </div>
+            </div>
           </label>
 
           {formData.deliveryAvailable && (

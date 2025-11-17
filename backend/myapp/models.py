@@ -1,6 +1,26 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 import uuid
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+
+
+class CustomJSONField(models.JSONField):
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        # If the value is already a list (or dict), return it directly
+        if isinstance(value, (list, dict)):
+            return value
+        try:
+            return json.loads(value, cls=self.decoder)
+        except json.JSONDecodeError:
+            return value
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+        return json.dumps(value, cls=DjangoJSONEncoder)
+
 
 class Profile(models.Model):
     user_id = models.UUIDField(primary_key=True, db_column="user_id", editable=False)
@@ -14,7 +34,7 @@ class Profile(models.Model):
     followers_count = models.IntegerField(default=0)
     rating_average = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
     rating_count = models.IntegerField(default=0)
-    services = models.JSONField(null=True, blank=True) # For services like Tutoring
+    services = CustomJSONField(null=True, blank=True)  # For services like Tutoring
     created_at = models.DateTimeField(auto_now_add=False, null=True, blank=True)
 
     class Meta:
@@ -23,7 +43,8 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.full_name or str(self.user_id)
-    
+
+
 class Item(models.Model):
     item_id = models.UUIDField(
         primary_key=True, db_column="item_id", default=uuid.uuid4, editable=False
@@ -50,7 +71,7 @@ class Item(models.Model):
         max_length=20, choices=CONDITION_CHOICES, null=True, blank=True
     )
 
-    tags = ArrayField(models.CharField(max_length=100), null=True, blank=True)
+    tags = CustomJSONField(null=True, blank=True, default=list)
 
     processing_time = models.CharField(max_length=50, null=True, blank=True)
     customizable = models.BooleanField(default=False)
@@ -121,4 +142,3 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-

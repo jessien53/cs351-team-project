@@ -2,6 +2,7 @@ export interface ImageObject {
   id: number;
   url: string;
   file: File;
+  dataURL: string;
 }
 
 export type ListingStatus = "draft" | "active";
@@ -23,4 +24,6 @@ export interface ListingFormData {
   deliveryFee: string;
   shippingAvailable: boolean;
   status: ListingStatus;
+  images?: ImageObject[];
+  video_url?: string;
 }
