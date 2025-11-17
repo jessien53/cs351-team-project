@@ -1,18 +1,27 @@
 import React from "react";
-import type { ListingFormData, ListingStatus } from "../../types/create.ts";
-import ListingDetails from "./listingDetails.tsx";
-import PricingInventory from "./pricingInventory.tsx";
-import ShippingDelivery from "./shippingDelivery.tsx";
-import AdditionalOptions from "./additionalOptions.tsx";
-import FormActions from "./formActions.tsx";
+import ListingDetails from "./listingDetails";
+import PricingInventory from "./pricingInventory";
+import ShippingDelivery from "./shippingDelivery";
+import AdditionalOptions from "./additionalOptions";
+import ImageUploader from "./ImageUploader";
+import FormActions from "./formActions";
+import type {
+  ListingFormData,
+  ListingStatus,
+  ImageObject,
+} from "../../types/create";
 
 interface Props {
   formData: ListingFormData;
-  onFormChange: (field: keyof ListingFormData, value: string | boolean) => void;
+  onFormChange: (
+    field: keyof ListingFormData,
+    value: string | boolean | number | ImageObject[]
+  ) => void;
   onTagsChange: (tags: string[]) => void;
   onSubmit: (status: ListingStatus) => void;
-  categories: string[];
-  conditions: string[];
+  isSubmitting?: boolean;
+  categories?: string[];
+  conditions?: string[];
 }
 
 const ListingForm: React.FC<Props> = ({
@@ -20,34 +29,49 @@ const ListingForm: React.FC<Props> = ({
   onFormChange,
   onTagsChange,
   onSubmit,
-  categories,
-  conditions,
+  isSubmitting = false,
+  categories = [],
+  conditions = [],
 }) => {
+  const setImages = (value: React.SetStateAction<ImageObject[]>) => {
+    if (typeof value === "function") {
+      onFormChange("images", value(formData.images || []));
+    } else {
+      onFormChange("images", value);
+    }
+  };
+
   return (
-    <div className="lg:w-1/2 overflow-y-auto">
-      <div className="max-w-2xl mx-auto p-8 lg:p-12">
-        <div className="space-y-8">
-          <ListingDetails
-            formData={formData}
-            onFormChange={onFormChange}
-            categories={categories}
-            conditions={conditions}
-          />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+      <ImageUploader
+        images={formData.images || []}
+        setImages={setImages}
+        videoUrl={formData.video_url || ""}
+        onVideoUrlChange={(url: string) => onFormChange("video_url", url)}
+      />
 
-          <PricingInventory formData={formData} onFormChange={onFormChange} />
-
-          {!formData.isDigital && (
+      <div className="lg:w-1/2 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-8 lg:p-12">
+          <div className="space-y-8">
+            <ListingDetails
+              formData={formData}
+              onFormChange={onFormChange}
+              categories={categories}
+              conditions={conditions}
+            />
+            <PricingInventory formData={formData} onFormChange={onFormChange} />
             <ShippingDelivery formData={formData} onFormChange={onFormChange} />
-          )}
+            <AdditionalOptions
+              customizable={formData.customizable}
+              onFormChange={onFormChange}
+              tags={formData.tags}
+              onTagsChange={onTagsChange}
+            />
+          </div>
 
-          <AdditionalOptions
-            customizable={formData.customizable}
-            tags={formData.tags}
-            onFormChange={onFormChange}
-            onTagsChange={onTagsChange}
-          />
-
-          <FormActions onSubmit={onSubmit} />
+          <div className="mt-12">
+            <FormActions onSubmit={onSubmit} isSubmitting={isSubmitting} />
+          </div>
         </div>
       </div>
     </div>

@@ -17,11 +17,17 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from myapp.views import autocomplete_view, search_view, profile_view
+from myapp.views import (
+    autocomplete_view,
+    search_view,
+    profile_view,
+    create_listing_view,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/autocomplete/", autocomplete_view, name="autocomplete"),
     path("api/search/", search_view, name="search"),
     path("api/profile/<uuid:id>/", profile_view, name="profile"),
+    path("api/listings/create/", create_listing_view, name="create_listing"),
 ]

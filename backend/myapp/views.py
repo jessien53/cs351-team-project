@@ -1,8 +1,13 @@
 # from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
 from .models import Item, Profile
+import json
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import uuid
 from time import localtime
 
 
@@ -126,3 +131,100 @@ def search_view(request):
         },
         json_dumps_params={"indent": 2},
     )
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_listing_view(request):
+    """
+    Handle creating a new listing.
+    POST /api/listings/create/
+    """
+    try:
+        data = json.loads(request.body)
+
+        # Get seller profile
+        seller_id = data.get("seller_id")
+        if not seller_id:
+            return JsonResponse({"error": "seller_id is required"}, status=400)
+
+        try:
+            seller_profile = Profile.objects.get(user_id=seller_id)
+        except Profile.DoesNotExist:
+            return JsonResponse({"error": "Seller profile not found"}, status=404)
+
+        # Basic validation for required fields
+        required_fields = [
+            "title",
+            "description",
+            "price",
+            "quantity_available",
+            "category_id",
+            "thumbnail_url",
+        ]
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"error": f"{field} is required"}, status=400)
+
+        # Create a new Item instance
+        # Ensure tags are stored as a list of strings
+        tags = data.get("tags", [])
+        if isinstance(tags, str):
+            # If tags are a single string, try to parse it as JSON
+            try:
+                tags = json.loads(tags)
+            except json.JSONDecodeError:
+                # If it's just a plain string, make it a list
+                tags = [tags] if tags else []
+        
+        # Ensure it's a list
+        if not isinstance(tags, list):
+            tags = []
+
+        new_item = Item(
+            seller_id=seller_profile,
+            title=data["title"],
+            description=data["description"],
+            price=data["price"],
+            quantity_available=data["quantity_available"],
+            category_id=uuid.UUID(data["category_id"]),
+            thumbnail_url=data["thumbnail_url"],
+            # Optional fields
+            subcategory_id=(
+                uuid.UUID(data["subcategory_id"])
+                if data.get("subcategory_id")
+                else None
+            ),
+            is_digital=data.get("is_digital", False),
+            condition=(
+                data.get("condition", "").lower() if data.get("condition") else None
+            ),
+            tags=tags,
+            processing_time=data.get("processing_time"),
+            customizable=data.get("customizable", False),
+            video_url=data.get("video_url"),
+            delivery_available=data.get("delivery_available", False),
+            delivery_radius=data.get("delivery_radius"),
+            delivery_fee=data.get("delivery_fee"),
+            shipping_available=data.get("shipping_available", False),
+            status=data.get("status", "active"),
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+            published_at=(
+                timezone.now() if data.get("status", "active") == "active" else None
+            ),
+        )
+        new_item.save()
+
+        return JsonResponse(
+            {
+                "message": "Listing created successfully",
+                "item_id": str(new_item.item_id),
+            },
+            status=201,
+        )
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
