@@ -46,7 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <img
         src={image || "https://placehold.co/800"}
         alt={title}
-        className="bg-ui rounded-t-lg object-cover h-48 w-full"
+        className="bg-ui rounded-t-lg object-cover aspect-square w-full"
       />
       <div className="flex-1 p-4">
         <div className="font-semibold text-dark mb-1">{title}</div>
