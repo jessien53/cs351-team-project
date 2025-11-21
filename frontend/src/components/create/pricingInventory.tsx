@@ -1,12 +1,17 @@
 import React from "react";
-import type { ListingFormData } from "../../types/create.ts";
+import type { ListingFormData, ValidationErrors } from "../../types/create.ts";
 
 interface Props {
   formData: ListingFormData;
   onFormChange: (field: keyof ListingFormData, value: string | boolean) => void;
+  errors?: ValidationErrors;
 }
 
-const PricingInventory: React.FC<Props> = ({ formData, onFormChange }) => {
+const PricingInventory: React.FC<Props> = ({
+  formData,
+  onFormChange,
+  errors = {},
+}) => {
   return (
     <div className="border-t pt-8">
       <h3 className="text-xl font-bold mb-6">Pricing & Inventory</h3>
@@ -22,12 +27,19 @@ const PricingInventory: React.FC<Props> = ({ formData, onFormChange }) => {
             <input
               type="number"
               step="0.01"
+              min="0"
               value={formData.price}
               onChange={(e) => onFormChange("price", e.target.value)}
               placeholder="0.00"
-              className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
+              className={`w-full pl-8 pr-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition placeholder:text-gray-400 ${
+                errors.price ? "border-red-500" : "border-gray-200"
+              }`}
+              required
             />
           </div>
+          {errors.price && (
+            <div className="text-xs text-red-600 mt-1">{errors.price}</div>
+          )}
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -38,8 +50,15 @@ const PricingInventory: React.FC<Props> = ({ formData, onFormChange }) => {
             min="1"
             value={formData.quantity}
             onChange={(e) => onFormChange("quantity", e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
+            placeholder="1"
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition placeholder:text-gray-400 ${
+              errors.quantity ? "border-red-500" : "border-gray-200"
+            }`}
+            required
           />
+          {errors.quantity && (
+            <div className="text-xs text-red-600 mt-1">{errors.quantity}</div>
+          )}
         </div>
       </div>
 

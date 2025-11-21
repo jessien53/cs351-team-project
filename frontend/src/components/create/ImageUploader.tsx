@@ -8,6 +8,7 @@ interface Props {
   setImages: React.Dispatch<React.SetStateAction<ImageObject[]>>;
   videoUrl: string;
   onVideoUrlChange: (url: string) => void;
+  error?: string;
 }
 
 const ImageUploader: React.FC<Props> = ({
@@ -15,6 +16,7 @@ const ImageUploader: React.FC<Props> = ({
   setImages,
   videoUrl,
   onVideoUrlChange,
+  error,
 }) => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -73,6 +75,11 @@ const ImageUploader: React.FC<Props> = ({
             <p className="text-white/60 text-sm">
               Add up to 10 photos. First image will be the cover.
             </p>
+            {error && (
+              <div className="text-red-400 text-sm mt-2 font-semibold">
+                {error}
+              </div>
+            )}
           </div>
 
           {/* Image Grid */}
@@ -157,7 +164,7 @@ const ImageUploader: React.FC<Props> = ({
               value={videoUrl}
               onChange={(e) => onVideoUrlChange(e.target.value)}
               placeholder="https://youtube.com/watch?v=..."
-              className="w-full px-4 py-3 bg-white/10 border-2 border-transparent rounded-lg text-white placeholder-white/40 focus:outline-none focus:bg-white/5 focus:border-primary transition"
+              className="w-full px-4 py-3 bg-white/10 border-2 border-transparent rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/5 focus:border-primary transition"
             />
           </div>
         </div>

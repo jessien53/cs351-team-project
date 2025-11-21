@@ -42,7 +42,8 @@ const TagManager: React.FC<Props> = ({ tags, onTagsChange }) => {
           onChange={(e) => setTagInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Add a tag..."
-          className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
+          maxLength={30}
+          className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition placeholder:text-gray-400"
         />
         <button
           type="button"

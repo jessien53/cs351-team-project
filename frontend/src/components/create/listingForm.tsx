@@ -9,6 +9,7 @@ import type {
   ListingFormData,
   ListingStatus,
   ImageObject,
+  ValidationErrors,
 } from "../../types/create";
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
   isSubmitting?: boolean;
   categories?: string[];
   conditions?: string[];
+  errors?: ValidationErrors;
 }
 
 const ListingForm: React.FC<Props> = ({
@@ -32,6 +34,7 @@ const ListingForm: React.FC<Props> = ({
   isSubmitting = false,
   categories = [],
   conditions = [],
+  errors = {},
 }) => {
   const setImages = (value: React.SetStateAction<ImageObject[]>) => {
     if (typeof value === "function") {
@@ -48,6 +51,7 @@ const ListingForm: React.FC<Props> = ({
         setImages={setImages}
         videoUrl={formData.video_url || ""}
         onVideoUrlChange={(url: string) => onFormChange("video_url", url)}
+        error={errors.images}
       />
 
       <div className="lg:w-1/2 overflow-y-auto">
@@ -58,9 +62,18 @@ const ListingForm: React.FC<Props> = ({
               onFormChange={onFormChange}
               categories={categories}
               conditions={conditions}
+              errors={errors}
             />
-            <PricingInventory formData={formData} onFormChange={onFormChange} />
-            <ShippingDelivery formData={formData} onFormChange={onFormChange} />
+            <PricingInventory
+              formData={formData}
+              onFormChange={onFormChange}
+              errors={errors}
+            />
+            <ShippingDelivery
+              formData={formData}
+              onFormChange={onFormChange}
+              errors={errors}
+            />
             <AdditionalOptions
               customizable={formData.customizable}
               onFormChange={onFormChange}

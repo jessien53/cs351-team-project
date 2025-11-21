@@ -17,6 +17,19 @@ export interface SellerInfo {
 
 export type ListingStatus = "draft" | "active";
 
+export interface ValidationErrors {
+  title?: string;
+  category?: string;
+  condition?: string;
+  description?: string;
+  price?: string;
+  quantity?: string;
+  images?: string;
+  processingTime?: string;
+  deliveryRadius?: string;
+  deliveryFee?: string;
+}
+
 export interface ListingFormData {
   title: string;
   price: string;

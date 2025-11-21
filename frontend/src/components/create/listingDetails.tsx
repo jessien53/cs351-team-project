@@ -1,11 +1,12 @@
 import React from "react";
-import type { ListingFormData } from "../../types/create.ts";
+import type { ListingFormData, ValidationErrors } from "../../types/create.ts";
 
 interface Props {
   formData: ListingFormData;
   onFormChange: (field: keyof ListingFormData, value: string | boolean) => void;
   categories: string[];
   conditions: string[];
+  errors?: ValidationErrors;
 }
 
 const ListingDetails: React.FC<Props> = ({
@@ -13,6 +14,7 @@ const ListingDetails: React.FC<Props> = ({
   onFormChange,
   categories,
   conditions,
+  errors = {},
 }) => {
   return (
     <div>
@@ -27,9 +29,15 @@ const ListingDetails: React.FC<Props> = ({
             value={formData.title}
             onChange={(e) => onFormChange("title", e.target.value)}
             placeholder="e.g. Handcrafted Leather Messenger Bag"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition"
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition placeholder:text-gray-400 ${
+              errors.title ? "border-red-500" : "border-gray-200"
+            }`}
             maxLength={200}
+            required
           />
+          {errors.title && (
+            <div className="text-xs text-red-600 mt-1">{errors.title}</div>
+          )}
           <div className="text-xs text-gray-500 mt-1 text-right">
             {formData.title.length}/200
           </div>
@@ -44,15 +52,25 @@ const ListingDetails: React.FC<Props> = ({
               <select
                 value={formData.category}
                 onChange={(e) => onFormChange("category", e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white"
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white ${
+                  errors.category ? "border-red-500" : "border-gray-200"
+                }`}
+                required
               >
-                <option value="">Select...</option>
+                <option value="" className="text-gray-400">
+                  Select...
+                </option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
               </select>
+              {errors.category && (
+                <div className="text-xs text-red-600 mt-1">
+                  {errors.category}
+                </div>
+              )}
               {/* ... dropdown arrow SVG ... */}
             </div>
           </div>
@@ -64,15 +82,25 @@ const ListingDetails: React.FC<Props> = ({
               <select
                 value={formData.condition}
                 onChange={(e) => onFormChange("condition", e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white"
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white ${
+                  errors.condition ? "border-red-500" : "border-gray-200"
+                }`}
+                required
               >
-                <option value="">Select...</option>
+                <option value="" className="text-gray-400">
+                  Select...
+                </option>
                 {conditions.map((cond) => (
                   <option key={cond} value={cond}>
                     {cond}
                   </option>
                 ))}
               </select>
+              {errors.condition && (
+                <div className="text-xs text-red-600 mt-1">
+                  {errors.condition}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -86,8 +114,17 @@ const ListingDetails: React.FC<Props> = ({
             onChange={(e) => onFormChange("description", e.target.value)}
             placeholder="Describe your item in detail..."
             rows={6}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition resize-none"
+            className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition resize-none placeholder:text-gray-400 ${
+              errors.description ? "border-red-500" : "border-gray-200"
+            }`}
+            required
+            minLength={10}
           />
+          {errors.description && (
+            <div className="text-xs text-red-600 mt-1">
+              {errors.description}
+            </div>
+          )}
         </div>
       </div>
     </div>

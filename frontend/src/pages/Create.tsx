@@ -8,6 +8,7 @@ import type {
   ImageObject,
   ListingFormData,
   ListingStatus,
+  ValidationErrors,
 } from "../types/create.ts";
 import Delivery from "../components/listing/delivery.tsx";
 import { addListing } from "../services/addListing.ts";
@@ -60,6 +61,7 @@ const Create = () => {
   const { currentUser } = useAuth(); // Get user from auth context
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
   const [formData, setFormData] = useState<ListingFormData>({
     title: "",
     price: "",
@@ -87,6 +89,10 @@ const Create = () => {
     value: string | number | boolean | ImageObject[] | undefined
   ) => {
     setFormData((prev: ListingFormData) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[field as keyof ValidationErrors]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
   // Specific handler for updating tags
@@ -248,8 +254,67 @@ const Create = () => {
   // Handler for the final submission
   const handleSubmit = async (status: ListingStatus) => {
     if (!currentUser) {
-      console.error("You must be logged in to create a listing.");
-      // Optionally, show a message to the user
+      alert("You must be logged in to create a listing.");
+      return;
+    }
+
+    // Validate required fields
+    const newErrors: ValidationErrors = {};
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Please enter a title for your listing.";
+    }
+
+    if (!formData.category) {
+      newErrors.category = "Please select a category.";
+    }
+
+    if (!formData.condition) {
+      newErrors.condition = "Please select a condition.";
+    }
+
+    if (!formData.description.trim()) {
+      newErrors.description = "Please enter a description.";
+    } else if (formData.description.length < 10) {
+      newErrors.description = "Description must be at least 10 characters.";
+    }
+
+    if (!formData.price) {
+      newErrors.price = "Please enter a price.";
+    } else if (parseFloat(formData.price) <= 0) {
+      newErrors.price = "Price must be greater than 0.";
+    }
+
+    if (!formData.quantity) {
+      newErrors.quantity = "Please enter a quantity.";
+    } else if (parseInt(formData.quantity, 10) < 1) {
+      newErrors.quantity = "Quantity must be at least 1.";
+    }
+
+    if (!formData.images || formData.images.length === 0) {
+      newErrors.images = "Please upload at least one image for your listing.";
+    }
+
+    // Validate shipping fields if shipping is enabled
+    if (formData.shippingAvailable && !formData.processingTime.trim()) {
+      newErrors.processingTime = "Please enter processing time for shipping.";
+    }
+
+    // Validate delivery fields if delivery is enabled
+    if (formData.deliveryAvailable) {
+      if (!formData.deliveryRadius || parseFloat(formData.deliveryRadius) < 0) {
+        newErrors.deliveryRadius = "Please enter a valid delivery radius.";
+      }
+      if (!formData.deliveryFee || parseFloat(formData.deliveryFee) < 0) {
+        newErrors.deliveryFee = "Please enter a valid delivery fee (can be 0).";
+      }
+    }
+
+    // If there are errors, set them and stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      // Scroll to top to show errors
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -304,6 +369,7 @@ const Create = () => {
         isSubmitting={isSubmitting}
         categories={categories}
         conditions={conditions}
+        errors={errors}
       />
     </div>
   );
