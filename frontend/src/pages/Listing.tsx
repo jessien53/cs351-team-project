@@ -87,9 +87,7 @@ const Listing: React.FC = () => {
     shippingAvailable: item.shipping_available,
     deliveryAvailable: item.delivery_available,
     deliveryFee: item.delivery_fee || 0,
-    images: [
-      item.thumbnail_url,
-    ].filter(Boolean) as string[], // Filter out null/undefined
+    images: [item.thumbnail_url].filter(Boolean) as string[], // Filter out null/undefined
   };
 
   return (
@@ -104,17 +102,21 @@ const Listing: React.FC = () => {
           <div className="max-w-2xl mx-auto p-8 lg:p-12 space-y-8">
             <ProductHeader itemData={listingPageData} />
 
-            <div className="border-y py-6 space-y-4">
-              {listingPageData.shippingAvailable && (
-                <Shipping processingTime={listingPageData.processingTime} />
-              )}
+            {(listingPageData.shippingAvailable ||
+              listingPageData.deliveryAvailable ||
+              listingPageData.customizable) && (
+              <div className="py-6 space-y-4">
+                {listingPageData.shippingAvailable && (
+                  <Shipping processingTime={listingPageData.processingTime} />
+                )}
 
-              {listingPageData.deliveryAvailable && (
-                <Delivery deliveryFee={listingPageData.deliveryFee} />
-              )}
+                {listingPageData.deliveryAvailable && (
+                  <Delivery deliveryFee={listingPageData.deliveryFee} />
+                )}
 
-              {listingPageData.customizable && <Customizable />}
-            </div>
+                {listingPageData.customizable && <Customizable />}
+              </div>
+            )}
 
             <Purchase itemData={listingPageData} />
 

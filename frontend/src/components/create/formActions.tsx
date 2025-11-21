@@ -8,7 +8,7 @@ interface Props {
 
 const FormActions: React.FC<Props> = ({ onSubmit, isSubmitting = false }) => {
   return (
-    <div className="border-t pt-8 flex gap-4">
+    <div className="pt-8 flex gap-4">
       <button
         type="button"
         onClick={() => onSubmit("draft")}

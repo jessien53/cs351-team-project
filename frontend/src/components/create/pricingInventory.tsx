@@ -13,7 +13,7 @@ const PricingInventory: React.FC<Props> = ({
   errors = {},
 }) => {
   return (
-    <div className="border-t pt-8">
+    <div className="pt-8">
       <h3 className="text-xl font-bold mb-6">Pricing & Inventory</h3>
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>

@@ -45,7 +45,7 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="px-3 py-2 rounded-full border border-ui bg-light text-dark focus:outline-none"
+          className="px-4 py-2 rounded-lg bg-light text-dark border border-gray-300 focus:border-blue-500 focus:outline-none cursor-pointer"
         >
           <option value="relevance">Most relevant</option>
           <option value="newest">Newest</option>

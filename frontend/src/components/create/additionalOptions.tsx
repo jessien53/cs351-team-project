@@ -16,7 +16,7 @@ const AdditionalOptions: React.FC<Props> = ({
   onTagsChange,
 }) => {
   return (
-    <div className="border-t pt-8">
+    <div className="pt-8">
       <h3 className="text-xl font-bold mb-6">Additional Options</h3>
 
       <div className="space-y-4 mb-6">

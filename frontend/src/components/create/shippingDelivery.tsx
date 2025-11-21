@@ -13,7 +13,7 @@ const ShippingDelivery: React.FC<Props> = ({
   errors = {},
 }) => {
   return (
-    <div className="border-t pt-8">
+    <div className="pt-8">
       <h3 className="text-xl font-bold mb-6">Shipping & Delivery</h3>
       <div className="space-y-4">
         {/* Shipping Available */}
