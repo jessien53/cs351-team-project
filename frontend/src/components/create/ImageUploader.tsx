@@ -6,19 +6,40 @@ import type { ImageObject } from "../../types/create.ts";
 interface Props {
   images: ImageObject[];
   setImages: React.Dispatch<React.SetStateAction<ImageObject[]>>;
+  videoUrl: string;
+  onVideoUrlChange: (url: string) => void;
+  error?: string;
 }
 
-const ImageUploader: React.FC<Props> = ({ images, setImages }) => {
+const ImageUploader: React.FC<Props> = ({
+  images,
+  setImages,
+  videoUrl,
+  onVideoUrlChange,
+  error,
+}) => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     (e.target as HTMLInputElement).value = ""; // Clear the input
 
-    const newImages = files.map((file) => ({
-      id: Date.now() + Math.random(),
-      url: URL.createObjectURL(file),
-      file,
-    }));
-    setImages((prev) => [...prev, ...newImages].slice(0, 10)); // Enforce 10 image limit
+    const newImagePromises = files.map((file) => {
+      return new Promise<ImageObject>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve({
+            id: Date.now() + Math.random(),
+            url: URL.createObjectURL(file),
+            file,
+            dataURL: reader.result as string,
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(newImagePromises).then((newImages) => {
+      setImages((prev) => [...prev, ...newImages].slice(0, 10)); // Enforce 10 image limit
+    });
   };
 
   const removeImage = (id: number) => {
@@ -54,6 +75,11 @@ const ImageUploader: React.FC<Props> = ({ images, setImages }) => {
             <p className="text-white/60 text-sm">
               Add up to 10 photos. First image will be the cover.
             </p>
+            {error && (
+              <div className="text-red-400 text-sm mt-2 font-semibold">
+                {error}
+              </div>
+            )}
           </div>
 
           {/* Image Grid */}
@@ -122,6 +148,24 @@ const ImageUploader: React.FC<Props> = ({ images, setImages }) => {
                 <span className="text-white/50 text-sm">Add Photo</span>
               </label>
             )}
+          </div>
+
+          {/* Video URL Input */}
+          <div className="mt-6">
+            <label
+              htmlFor="video-url"
+              className="text-white text-sm font-semibold mb-2 block"
+            >
+              Video URL (Optional)
+            </label>
+            <input
+              id="video-url"
+              type="url"
+              value={videoUrl}
+              onChange={(e) => onVideoUrlChange(e.target.value)}
+              placeholder="https://youtube.com/watch?v=..."
+              className="w-full px-4 py-3 bg-white/10 border-2 border-transparent rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:bg-white/5 focus:border-primary transition"
+            />
           </div>
         </div>
       </div>

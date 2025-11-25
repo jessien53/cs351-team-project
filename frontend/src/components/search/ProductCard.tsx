@@ -46,7 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <img
         src={image || "https://placehold.co/800"}
         alt={title}
-        className="bg-ui rounded-t-lg object-cover h-48 w-full"
+        className="bg-ui rounded-t-lg object-cover aspect-square w-full"
       />
       <div className="flex-1 p-4">
         <div className="font-semibold text-dark mb-1">{title}</div>
@@ -55,13 +55,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
           className="flex items-center text-sm text-dark mt-auto cursor-pointer"
           onClick={handleUserProfileClick}
         >
-          <img 
-            src={avatar_url || logo} 
+          <img
+            src={avatar_url || logo}
             className="w-6 h-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full mr-2 object-cover"
           />
           <span className="hover:underline">{user}</span>{" "}
-          {/* <span className="mx-2">•</span>
-          {time} */}
+          <span className="mx-2">•</span>
+          {time}
         </div>
       </div>
     </div>

@@ -3,6 +3,53 @@ from django.http import JsonResponse, Http404
 from django.db.models import Q
 from .trie_loader import autocomplete_trie
 from .models import Item, Profile, Category
+from .storage import upload_image_to_supabase
+import json
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import uuid
+from time import localtime
+from datetime import datetime, timedelta
+
+
+def get_relative_time(dt):
+    """
+    Convert a datetime to a human-readable relative time string.
+    E.g., '2hrs ago', '3 days ago', '1 week ago', etc.
+    """
+    if dt is None:
+        return "Unknown"
+
+    # Make dt timezone-aware if it isn't already
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+
+    now = timezone.now()
+    diff = now - dt
+
+    seconds = diff.total_seconds()
+
+    if seconds < 60:
+        return "Just now"
+    elif seconds < 3600:  # Less than 1 hour
+        mins = int(seconds / 60)
+        return f"{mins}min{'s' if mins != 1 else ''} ago"
+    elif seconds < 86400:  # Less than 1 day
+        hours = int(seconds / 3600)
+        return f"{hours}hr{'s' if hours != 1 else ''} ago"
+    elif seconds < 604800:  # Less than 1 week
+        days = int(seconds / 86400)
+        return f"{days} day{'s' if days != 1 else ''} ago"
+    elif seconds < 2592000:  # Less than 30 days
+        weeks = int(seconds / 604800)
+        return f"{weeks} week{'s' if weeks != 1 else ''} ago"
+    elif seconds < 31536000:  # Less than 1 year
+        months = int(seconds / 2592000)
+        return f"{months} month{'s' if months != 1 else ''} ago"
+    else:
+        years = int(seconds / 31536000)
+        return f"{years} year{'s' if years != 1 else ''} ago"
 
 
 def autocomplete_view(request):
@@ -18,6 +65,7 @@ def autocomplete_view(request):
 
     return JsonResponse({"suggestions": suggestions})
 
+
 def profile_view(request, id):
     """
     Handle fetching a single user profile.
@@ -26,7 +74,7 @@ def profile_view(request, id):
     try:
         # Get the profile by its UUID
         profile = Profile.objects.get(user_id=id)
-        
+
         # Format the data for the frontend
         profile_data = {
             "user_id": profile.user_id,
@@ -38,19 +86,20 @@ def profile_view(request, id):
             "items_sold": profile.items_sold,
             "avg_response_time": profile.avg_response_time,
             "followers_count": profile.followers_count,
-            "rating_average": float(profile.rating_average), # Convert Decimal
+            "rating_average": float(profile.rating_average),  # Convert Decimal
             "rating_count": profile.rating_count,
-            "services": profile.services or [], # Handle null
+            "services": profile.services or [],  # Handle null
             "created_at": profile.created_at,
         }
-        
+
         return JsonResponse(profile_data)
-        
+
     except Profile.DoesNotExist:
         raise Http404("Profile not found")
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
+
+
 def listing_view(request, item_id):
     """
     Handle fetching a single item by its ID.
@@ -61,13 +110,13 @@ def listing_view(request, item_id):
         item = Item.objects.select_related("seller_id").get(item_id=item_id)
 
         # Get category name
-        category_name = "General" 
+        category_name = "General"
         try:
             category = Category.objects.get(category_id=item.category_id)
             category_name = category.name
         except Category.DoesNotExist:
-            pass  
-        
+            pass
+
         # Get seller data
         seller_data = {}
         if item.seller_id:
@@ -87,7 +136,7 @@ def listing_view(request, item_id):
             "title": item.title,
             "description": item.description,
             "category_id": str(item.category_id),
-            "price": float(item.price), # Convert Decimal to float
+            "price": float(item.price),  # Convert Decimal to float
             "quantity_available": item.quantity_available,
             "is_digital": item.is_digital,
             "condition": item.condition,
@@ -97,7 +146,9 @@ def listing_view(request, item_id):
             "thumbnail_url": item.thumbnail_url,
             "video_url": item.video_url,
             "delivery_available": item.delivery_available,
-            "delivery_fee": float(item.delivery_fee) if item.delivery_fee is not None else None,
+            "delivery_fee": (
+                float(item.delivery_fee) if item.delivery_fee is not None else None
+            ),
             "shipping_available": item.shipping_available,
             "total_sales": item.total_sales,
             "views_count": item.views_count,
@@ -107,15 +158,16 @@ def listing_view(request, item_id):
             "status": item.status,
             "created_at": item.created_at,
             # Add seller data
-            **seller_data, 
+            **seller_data,
         }
-        
+
         return JsonResponse(item_data)
-        
+
     except Item.DoesNotExist:
         return JsonResponse({"error": "Item not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
 
 def search_view(request):
     """
@@ -187,7 +239,7 @@ def search_view(request):
                 "user": item.seller_id.full_name or "Anonymous",
                 "user_id": str(item.seller_id.user_id),
                 "user_avatar": item.seller_id.avatar_url,
-                "time": "1hr ago",  # You'll want to calculate this from created_at
+                "time": get_relative_time(item.created_at),
                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
             }
         )
@@ -202,6 +254,136 @@ def search_view(request):
         json_dumps_params={"indent": 2},
     )
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_listing_view(request):
+    """
+    Handle creating a new listing with image uploads.
+    POST /api/listings/create/
+    Accepts: multipart/form-data
+    """
+    try:
+        # Get form data (text fields)
+        seller_id = request.POST.get("seller_id")
+        if not seller_id:
+            return JsonResponse({"error": "seller_id is required"}, status=400)
+
+        try:
+            seller_profile = Profile.objects.get(user_id=seller_id)
+        except Profile.DoesNotExist:
+            return JsonResponse({"error": "Seller profile not found"}, status=404)
+
+        # Basic validation for required fields
+        required_fields = [
+            "title",
+            "description",
+            "price",
+            "quantity_available",
+            "category_id",
+        ]
+        for field in required_fields:
+            if not request.POST.get(field):
+                return JsonResponse({"error": f"{field} is required"}, status=400)
+
+        # Handle image uploads
+        uploaded_image_urls = []
+        thumbnail_url = None
+
+        # Get all uploaded files (images)
+        images = request.FILES.getlist("images")
+
+        if not images:
+            return JsonResponse({"error": "At least one image is required"}, status=400)
+
+        # Upload each image to Supabase
+        for idx, image_file in enumerate(images):
+            try:
+                public_url = upload_image_to_supabase(image_file, folder="listings")
+                uploaded_image_urls.append(public_url)
+
+                # First image becomes the thumbnail
+                if idx == 0:
+                    thumbnail_url = public_url
+
+            except Exception as e:
+                return JsonResponse(
+                    {"error": f"Failed to upload image {idx + 1}: {str(e)}"}, status=500
+                )
+
+        # Parse tags
+        tags = request.POST.get("tags", "")
+        if tags:
+            try:
+                tags = (
+                    json.loads(tags)
+                    if tags.startswith("[")
+                    else [tag.strip() for tag in tags.split(",")]
+                )
+            except json.JSONDecodeError:
+                # If it's just a plain string, make it a list
+                tags = [tags] if tags else []
+
+        # Ensure it's a list
+        if not isinstance(tags, list):
+            tags = []
+
+        # Create a new Item instance
+        new_item = Item(
+            seller_id=seller_profile,
+            title=request.POST.get("title"),
+            description=request.POST.get("description"),
+            price=request.POST.get("price"),
+            quantity_available=request.POST.get("quantity_available"),
+            category_id=uuid.UUID(request.POST.get("category_id")),
+            thumbnail_url=thumbnail_url,
+            # Optional fields
+            subcategory_id=(
+                uuid.UUID(request.POST.get("subcategory_id"))
+                if request.POST.get("subcategory_id")
+                else None
+            ),
+            is_digital=request.POST.get("is_digital", "false").lower() == "true",
+            condition=(
+                request.POST.get("condition", "").lower()
+                if request.POST.get("condition")
+                else None
+            ),
+            tags=tags,
+            processing_time=request.POST.get("processing_time"),
+            customizable=request.POST.get("customizable", "false").lower() == "true",
+            video_url=request.POST.get("video_url"),
+            delivery_available=request.POST.get("delivery_available", "false").lower()
+            == "true",
+            delivery_radius=request.POST.get("delivery_radius") or None,
+            delivery_fee=request.POST.get("delivery_fee") or None,
+            shipping_available=request.POST.get("shipping_available", "false").lower()
+            == "true",
+            status=request.POST.get("status", "active"),
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+            published_at=(
+                timezone.now()
+                if request.POST.get("status", "active") == "active"
+                else None
+            ),
+        )
+        new_item.save()
+
+        return JsonResponse(
+            {
+                "message": "Listing created successfully",
+                "item_id": str(new_item.item_id),
+                "thumbnail_url": thumbnail_url,
+                "image_urls": uploaded_image_urls,
+            },
+            status=201,
+        )
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 def profile_listings_view(request, seller_id):
     """
     GET /api/profile/<seller_id>/listings/
@@ -209,20 +391,26 @@ def profile_listings_view(request, seller_id):
     """
     try:
         # Filter items by the seller's UUID
-        items = Item.objects.filter(seller_id=seller_id, is_active=True).select_related("seller_id").order_by("-created_at")
-        
+        items = (
+            Item.objects.filter(seller_id=seller_id, is_active=True)
+            .select_related("seller_id")
+            .order_by("-created_at")
+        )
+
         results = []
         for item in items:
-            results.append({
-                "id": str(item.item_id),
-                "title": item.title,
-                "price": f"${item.price}",
-                "user": item.seller_id.full_name or "Anonymous",
-                "user_id": str(item.seller_id.user_id),
-                "time": "1hr ago", # TODO: calculate from created_at
-                "image": item.thumbnail_url,
-            })
-            
+            results.append(
+                {
+                    "id": str(item.item_id),
+                    "title": item.title,
+                    "price": f"${item.price}",
+                    "user": item.seller_id.full_name or "Anonymous",
+                    "user_id": str(item.seller_id.user_id),
+                    "time": "1hr ago",  # TODO: calculate from created_at
+                    "image": item.thumbnail_url,
+                }
+            )
+
         return JsonResponse({"results": results})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

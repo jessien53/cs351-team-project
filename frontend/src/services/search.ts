@@ -58,3 +58,4 @@ export async function searchProducts(params: SearchParams): Promise<SearchRespon
     per_page: Number(data.per_page || 12),
   };
 }
+

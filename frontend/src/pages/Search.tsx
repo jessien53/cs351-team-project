@@ -24,6 +24,9 @@ const Search: React.FC = () => {
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [perPage, setPerPage] = useState(12);
 
   const debouncedQuery = useDebounced(query, 350);
 
@@ -31,14 +34,16 @@ const Search: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await searchProducts({ query: debouncedQuery, tags, sort });
+      const res = await searchProducts({ query: debouncedQuery, tags, sort, page });
       setResults(res.results || []);
+      setTotal(res.total);
+      setPerPage(res.per_page);
     } catch (err: any) {
       setError(err?.message || "Failed to fetch results");
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, tags, sort]);
+  }, [debouncedQuery, tags, sort, page]);
 
   useEffect(() => {
     // Only fetch when search is meaningful or filters change
@@ -48,7 +53,10 @@ const Search: React.FC = () => {
   // keep query in sync if the URL changes (user used header search)
   useEffect(() => {
     const qFromUrl = new URLSearchParams(location.search).get("q") || "";
-    if (qFromUrl !== query) setQuery(qFromUrl);
+    if (qFromUrl !== query) {
+      setQuery(qFromUrl);
+      setPage(1); // Reset to first page on new search
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
@@ -95,6 +103,27 @@ const Search: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {productNodes}
         </div>
+        {!loading && results.length > 0 && (
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 bg-accent text-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-90 transition-all"
+            >
+              Previous
+            </button>
+            <span className="text-dark">
+              Page {page} of {Math.ceil(total / perPage)}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= Math.ceil(total / perPage)}
+              className="px-4 py-2 bg-accent text-light rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-90 transition-all"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
