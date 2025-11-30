@@ -154,7 +154,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     # vercel deployment URL
-    # "https://cs351-team-project-frontend.vercel.app",
+    "https://cs351-team-project.vercel.app",
 ]
 
 # Increase upload size limit (default is 2.5MB)
