@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAutocompleteSuggestions } from "../../services/autocomplete";
 import { useAuth } from "../../context/AuthContext";
-import logo from "../../assets/Logo.png";
+import logo from "../../assets/logo.png";
 
 const Header: React.FC = () => {
   const [q, setQ] = useState("");
