@@ -150,12 +150,14 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Allow your React app (running on port 5173) to make requests
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    # vercel deployment URL
-    "https://cs351-team-project.vercel.app",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     # vercel deployment URL
+#     "https://cs351-team-project.vercel.app",
+#     "https://campusmarketplace-9umw2p4uf-jessies-projects-d0cafa29.vercel.app",
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Increase upload size limit (default is 2.5MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
