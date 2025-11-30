@@ -5,3 +5,6 @@ dotenv
 django-cors-headers
 requests
 supabase
+dj-database-url
+whitenoise[brotli]
+gunicorn

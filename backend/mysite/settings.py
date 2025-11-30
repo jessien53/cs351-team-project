@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Or specific render domain later
 
 
 # Application definition
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -94,6 +95,7 @@ DATABASES = {
             "sslmode": "require",
         },
     }
+    
 }
 
 
@@ -133,6 +135,16 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# From https://render.com/docs/deploy-django#creating-a-new-django-project
+# This production code might break development mode, so we check whether we're in DEBUG mode
+if not DEBUG:
+    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # Enable the WhiteNoise storage backend, which compresses static files to reduce disk use
+    # and renames the files with unique names for each version to support long-term caching
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -141,6 +153,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Allow your React app (running on port 5173) to make requests
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    # vercel deployment URL
+    # "https://cs351-team-project-frontend.vercel.app",
 ]
 
 # Increase upload size limit (default is 2.5MB)
