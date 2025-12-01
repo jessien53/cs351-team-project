@@ -11,7 +11,9 @@ from django.utils import timezone
 import uuid
 from time import localtime
 from datetime import datetime, timedelta
-
+from .pQueue_loader import pq
+from .disjointSet_loader import ds
+from collections import defaultdict
 
 def get_relative_time(dt):
     """
@@ -169,66 +171,272 @@ def listing_view(request, item_id):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+# def search_view(request):
+#     """
+#     Handle product search with filtering and sorting.
+#     GET /api/search/?q=<query>&tags=<tag1,tag2>&sort=<sort_option>&page=<page>&per_page=<per_page>
+#     Returns: {"results": [...], "total": int, "page": int, "per_page": int}
+#     """
+    
+#     query = request.GET.get("q", "").strip()
+#     tags = request.GET.get("tags", "").strip()
+#     sort = request.GET.get("sort", "relevance")
+#     page = int(request.GET.get("page", 1))
+#     per_page = int(request.GET.get("per_page", 12))
+
+#     items = Item.objects.filter(is_active=True).select_related("seller_id")
+
+#     # Filter by search query (search in title)
+#     if query:
+#         items = items.filter(title__icontains=query)
+
+#     # Filter by tags/category
+#     if tags:
+#         tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+#         if tag_list:
+#             # Find category UUIDs that match the tag names
+#             category_ids = list(
+#                 Category.objects.filter(name__in=tag_list).values_list(
+#                     "category_id", flat=True
+#                 )
+#             )
+
+#             tag_query = Q()
+#             for tag in tag_list:
+#                 # Search in text tags
+#                 tag_query |= Q(tags__icontains=tag)
+
+#             # Also search for matching category or subcategory UUIDs
+#             if category_ids:
+#                 tag_query |= Q(category_id__in=category_ids) | Q(
+#                     subcategory_id__in=category_ids
+#                 )
+
+#             items = items.filter(tag_query)
+
+#     # Apply sorting
+#     if sort == "newest":
+#         items = items.order_by("-created_at")
+#     elif sort == "price_asc":
+#         items = items.order_by("price")
+#     elif sort == "price_desc":
+#         items = items.order_by("-price")
+#     # 'relevance' is default (no special ordering beyond the query match)
+
+#     # Get total count before pagination
+#     total = items.count()
+
+#     # Apply pagination
+#     start = (page - 1) * per_page
+#     end = start + per_page
+#     paginated_items = items[start:end]
+
+#     # Format results
+#     results = []
+#     for item in paginated_items:
+#         results.append(
+#             {
+#                 "id": str(item.item_id),
+#                 "title": item.title,
+#                 "price": f"${item.price}",
+#                 "user": item.seller_id.full_name or "Anonymous",
+#                 "user_id": str(item.seller_id.user_id),
+#                 "user_avatar": item.seller_id.avatar_url,
+#                 "time": get_relative_time(item.created_at),
+#                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+#             }
+#         )
+
+#     return JsonResponse(
+#         {
+#             "results": results,
+#             "total": total,
+#             "page": page,
+#             "per_page": per_page,
+#         },
+#         json_dumps_params={"indent": 2},
+#     )
+
+#my implementation;
+# def search_view(request):
+#     query = request.GET.get("q", "").strip()
+#     tags = request.GET.get("tags", "").strip()
+#     sort = request.GET.get("sort", "relevance")
+#     page = int(request.GET.get("page", 1))
+#     per_page = int(request.GET.get("per_page", 12))
+
+#     items = Item.objects.filter(is_active=True).select_related("seller_id")
+#     I = Item.objects.filter(is_active=True).values('item_id', 'tags')
+#     #populate the disjoint set
+#     # Map tag -> list of item_ids
+#     tag_map = {}
+#     for item_ in I:
+#         item_id = item_['item_id']
+#         tags = item_['tags'] or []
+#         for tag in tags:
+#             tag_map.setdefault(tag, []).append(item_id)
+
+#     # Union items that share the same tag
+#     for item_ids in tag_map.values():
+#         if not item_ids:
+#             continue
+#         root = item_ids[0]
+#         for other in item_ids[1:]:
+#             ds.union(root, other)
+
+#     if query:
+#         # Step 1: find items whose title matches the query
+#         matched_items = list(items.filter(title__icontains=query))
+#         matched_ids = [item.item_id for item in matched_items]
+
+#         # Step 2: use DisjointSet to find all related item_ids
+#         related_ids = set()
+#         root_map = {}
+#         for node in ds.parent:
+#             root = ds.find(node)
+#             root_map.setdefault(root, set()).add(node)
+
+#         # Then collect related_ids
+#         related_ids = set()
+#         for item_id in matched_ids:
+#             root = ds.find(item_id)
+#             # Include all items with the same root in DS
+#             related_ids.update(root_map.get(root, {item_id}))
+            
+
+#         # Step 3: filter the main queryset to include only matched + related items
+#         items = items.filter(item_id__in=related_ids)
+
+#     # Filter by tags/category if provided
+#     if tags:
+#         tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+#         if tag_list:
+#             category_ids = list(
+#                 Category.objects.filter(name__in=tag_list).values_list("category_id", flat=True)
+#             )
+
+#             tag_query = Q()
+#             for tag in tag_list:
+#                 tag_query |= Q(tags__icontains=tag)
+#             if category_ids:
+#                 tag_query |= Q(category_id__in=category_ids) | Q(subcategory_id__in=category_ids)
+
+#             items = items.filter(tag_query)
+
+#     # Apply sorting
+#     if sort == "newest":
+#         items = items.order_by("-created_at")
+#     elif sort == "price_asc":
+#         items = items.order_by("price")
+#     elif sort == "price_desc":
+#         items = items.order_by("-price")
+
+#     total = items.count()
+
+#     # Pagination
+#     start = (page - 1) * per_page
+#     end = start + per_page
+#     paginated_items = items[start:end]
+
+#     results = []
+#     for item in paginated_items:
+#         results.append(
+#             {
+#                 "id": str(item.item_id),
+#                 "title": item.title,
+#                 "price": f"${item.price}",
+#                 "user": item.seller_id.full_name or "Anonymous",
+#                 "user_id": str(item.seller_id.user_id),
+#                 "user_avatar": item.seller_id.avatar_url,
+#                 "time": get_relative_time(item.created_at),
+#                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+#             }
+#         )
+
+#     return JsonResponse(
+#         {
+#             "results": results,
+#             "total": total,
+#             "page": page,
+#             "per_page": per_page,
+#         },
+#         json_dumps_params={"indent": 2},
+#     )
+
 def search_view(request):
-    """
-    Handle product search with filtering and sorting.
-    GET /api/search/?q=<query>&tags=<tag1,tag2>&sort=<sort_option>&page=<page>&per_page=<per_page>
-    Returns: {"results": [...], "total": int, "page": int, "per_page": int}
-    """
+    # -----------------------------
+    # 1️⃣ Extract query params
+    # -----------------------------
     query = request.GET.get("q", "").strip()
-    tags = request.GET.get("tags", "").strip()
+    tags_param = request.GET.get("tags", [])
     sort = request.GET.get("sort", "relevance")
     page = int(request.GET.get("page", 1))
     per_page = int(request.GET.get("per_page", 12))
 
-    items = Item.objects.filter(is_active=True).select_related("seller_id")
+    # -----------------------------
+    # 2️⃣ Base queryset
+    # -----------------------------
+    items_qs = Item.objects.filter(is_active=True).select_related("seller_id")
 
-    # Filter by search query (search in title)
+    # -----------------------------
+    # 3️⃣ Filter items by query using pre-populated DSU
+    # -----------------------------
     if query:
-        items = items.filter(title__icontains=query)
+        matched_items = list(items_qs.filter(title__icontains=query))
+        matched_ids = [item.item_id for item in matched_items]
 
-    # Filter by tags/category
-    if tags:
-        tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+        related_ids = set()
+        for item_id in matched_ids:
+            try:
+                root = ds.find(item_id)
+                # Add all members of this root
+                group_members = [node for node in ds.parent if ds.find(node) == root]
+                related_ids.update(group_members)
+            except KeyError:
+                # Item not in DSU (no tags), include individually
+                related_ids.add(item_id)
+
+        # Filter main queryset
+        items_qs = items_qs.filter(item_id__in=related_ids)
+
+    # -----------------------------
+    # 4️⃣ Optional: filter by tags_param
+    # -----------------------------
+    if tags_param:
+        if isinstance(tags_param, str):
+            tag_list = [t.strip() for t in tags_param.split(",") if t.strip()]
+        elif isinstance(tags_param, list):
+            tag_list = [t.strip() for t in tags_param if t.strip()]
+        else:
+            tag_list = []
+
         if tag_list:
-            # Find category UUIDs that match the tag names
-            category_ids = list(
-                Category.objects.filter(name__in=tag_list).values_list(
-                    "category_id", flat=True
-                )
-            )
-
             tag_query = Q()
             for tag in tag_list:
-                # Search in text tags
                 tag_query |= Q(tags__icontains=tag)
+            items_qs = items_qs.filter(tag_query)
 
-            # Also search for matching category or subcategory UUIDs
-            if category_ids:
-                tag_query |= Q(category_id__in=category_ids) | Q(
-                    subcategory_id__in=category_ids
-                )
-
-            items = items.filter(tag_query)
-
-    # Apply sorting
+    # -----------------------------
+    # 5️⃣ Sorting
+    # -----------------------------
     if sort == "newest":
-        items = items.order_by("-created_at")
+        items_qs = items_qs.order_by("-created_at")
     elif sort == "price_asc":
-        items = items.order_by("price")
+        items_qs = items_qs.order_by("price")
     elif sort == "price_desc":
-        items = items.order_by("-price")
-    # 'relevance' is default (no special ordering beyond the query match)
+        items_qs = items_qs.order_by("-price")
 
-    # Get total count before pagination
-    total = items.count()
-
-    # Apply pagination
+    # -----------------------------
+    # 6️⃣ Pagination
+    # -----------------------------
+    total = items_qs.count()
     start = (page - 1) * per_page
     end = start + per_page
-    paginated_items = items[start:end]
+    paginated_items = items_qs[start:end]
 
-    # Format results
+    # -----------------------------
+    # 7️⃣ Format results
+    # -----------------------------
     results = []
     for item in paginated_items:
         results.append(
@@ -240,7 +448,7 @@ def search_view(request):
                 "user_id": str(item.seller_id.user_id),
                 "user_avatar": item.seller_id.avatar_url,
                 "time": get_relative_time(item.created_at),
-                "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+                "image": getattr(item, "thumbnail_url", None),
             }
         )
 
@@ -417,5 +625,87 @@ def profile_listings_view(request, seller_id):
             )
 
         return JsonResponse({"results": results})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+##implementing the second DB;
+def all_items_view(request):
+    try:
+        items = Item.objects.filter(is_active=True).select_related("seller_id")
+        item_list = []
+        for item in items:
+            seller_data = {}
+            if item.seller_id:
+                seller_data = {
+                    "seller_id": str(item.seller_id.user_id),
+                    "seller_name": item.seller_id.full_name,
+                    "seller_rating": float(item.seller_id.rating_average),
+                    "seller_sales": item.seller_id.items_sold,
+                }
+
+            item_list.append({
+                "item_id": str(item.item_id),
+                "title": item.title,
+                "price": float(item.price),
+                "total_sales": item.total_sales,
+                "rating_average": float(item.rating_average),
+                "thumbnail_url": item.thumbnail_url,
+                **seller_data,
+            })
+        return JsonResponse({"items": item_list})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
+def top_products(request):
+    
+
+    #fetch products from DB
+    products = list(Item.objects.filter(is_active=True).values(
+        'item_id', 'title', 'total_sales', 'rating_average', 'thumbnail_url'
+    ))
+
+    # Compute priority score
+    for p in products:
+        p['priority'] = p['total_sales'] + int(p['rating_average'] * 20)
+        pq.enqueue(p)
+
+    # Return top 10 products
+    top_items = [pq.dequeue() for _ in range(min(10, pq.size()))]
+
+    return JsonResponse({"top_items": top_items})
+
+
+@csrf_exempt
+def populate(request):
+    # Optional: restrict method for safety
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+
+    try:
+        # Step 1: group items by tags
+        # Step 1: fetch all items
+        products = Item.objects.all()
+
+        # Step 2: make each item a set
+        for item in products:
+            ds.make_set(item.item_id)
+
+        # Step 3: build tag map
+        tag_map = defaultdict(list)
+        for item in products:
+            tags = item.tags or []
+            for tag in tags:
+                tag_map[tag].append(item.item_id)
+
+        # Step 4: union items that share tags
+        for item_ids in tag_map.values():
+            if len(item_ids) <= 1:
+                continue
+            first_item = item_ids[0]
+            for other_item in item_ids[1:]:
+                ds.union(first_item, other_item)
+        
+        return JsonResponse({"status": "success"})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

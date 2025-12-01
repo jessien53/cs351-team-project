@@ -142,3 +142,12 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+    
+class DisjointSet(models.Model):
+    node = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.UUIDField()
+    size = models.IntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'disjoint_sets'  # use your existing table name
