@@ -23,3 +23,8 @@ node_modules/
 # Ignores user-specific editor configurations (e.g., for VSCode)
 .vscode/
 .idea/
+
+# Build Outputs
+# Ignores build directories for both backend and frontend
+build/
+dist/
