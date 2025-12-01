@@ -370,6 +370,11 @@ def create_listing_view(request):
         )
         new_item.save()
 
+        # Update the Trie in memory for autocomplete
+        words_in_title = new_item.title.split()
+        for word in words_in_title:
+            autocomplete_trie.insert(word)
+
         return JsonResponse(
             {
                 "message": "Listing created successfully",
