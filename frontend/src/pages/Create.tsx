@@ -48,10 +48,10 @@ const categories = [
 ];
 
 const categoryIdMapping: { [key: string]: string } = {
-  Services: "2b0fdab6-444f-4b3b-93cc-4872acebb900",
+  Services: "2b0fadb6-444f-4b3b-93cc-4872acebb90e",
   Books: "53588808-4211-401e-9037-8fe4b6c71c2c",
   Misc: "8ecf2146-9798-4990-9b10-8ae702f7ea93",
-  Electronics: "aa9a81b0-009f-4990-816b-c9add3e2cbc1",
+  Electronics: "aa9a81b0-009f-4990-816b-c9add3e2cbcf",
   Furniture: "b9ec7bed-ea59-478a-a50f-ef53c324df78",
   Clothing: "cd2f6b13-e5da-41c5-96cc-ffd673900156",
 };
