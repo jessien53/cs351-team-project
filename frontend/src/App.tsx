@@ -4,6 +4,7 @@ import Listing from "./pages/Listing";
 import Search from "./pages/Search";
 import Messages from "./pages/Messages";
 import Create from "./pages/Create";
+import DisjointSet from "./pages/Testing";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/listing/:itemId" element={<Listing />} />
         <Route path="/search" element={<Search />} />
         <Route path="/create" element={<Create />} />
+        <Route path="/test" element={<DisjointSet />} />
       </Routes>
     </Router>
   );

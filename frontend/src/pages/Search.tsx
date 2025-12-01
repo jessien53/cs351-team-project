@@ -5,6 +5,7 @@ import ProductCard from "../components/search/ProductCard";
 import type { Product, SortOption } from "../types/search";
 import { searchProducts } from "../services/search";
 import { useLocation } from "react-router-dom";
+//import {populateDisjointSet} from "../services/Populatedisjoint";
 
 function useDebounced<T>(value: T, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -35,6 +36,9 @@ const Search: React.FC = () => {
     setError(null);
     try {
       const res = await searchProducts({ query: debouncedQuery, tags, sort, page });
+      //console.log(res.results)
+      // const res2 = await populateDisjointSet();
+      // console.log(res2.message);
       setResults(res.results || []);
       setTotal(res.total);
       setPerPage(res.per_page);

@@ -36,6 +36,7 @@ const Header: React.FC = () => {
     const timer = setTimeout(async () => {
       if (q.trim().length > 0) {
         setIsLoading(true);
+        //this is where I would implement it;
         const results = await getAutocompleteSuggestions(q);
         setSuggestions(results);
         setShowSuggestions(results.length > 0);
@@ -69,6 +70,7 @@ const Header: React.FC = () => {
   const handleSearch = (searchQuery: string) => {
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.set("q", searchQuery.trim());
+    //I imagine this is where the search is included;
     navigate(`/search?${params.toString()}`);
     setShowSuggestions(false);
   };
