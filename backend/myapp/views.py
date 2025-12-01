@@ -258,65 +258,185 @@ def listing_view(request, item_id):
 #     )
 
 #my implementation;
+# def search_view(request):
+#     query = request.GET.get("q", "").strip()
+#     tags = request.GET.get("tags", "").strip()
+#     sort = request.GET.get("sort", "relevance")
+#     page = int(request.GET.get("page", 1))
+#     per_page = int(request.GET.get("per_page", 12))
+
+#     items = Item.objects.filter(is_active=True).select_related("seller_id")
+#     I = Item.objects.filter(is_active=True).values('item_id', 'tags')
+#     #populate the disjoint set
+#     # Map tag -> list of item_ids
+#     tag_map = {}
+#     for item_ in I:
+#         item_id = item_['item_id']
+#         tags = item_['tags'] or []
+#         for tag in tags:
+#             tag_map.setdefault(tag, []).append(item_id)
+
+#     # Union items that share the same tag
+#     for item_ids in tag_map.values():
+#         if not item_ids:
+#             continue
+#         root = item_ids[0]
+#         for other in item_ids[1:]:
+#             ds.union(root, other)
+
+#     if query:
+#         # Step 1: find items whose title matches the query
+#         matched_items = list(items.filter(title__icontains=query))
+#         matched_ids = [item.item_id for item in matched_items]
+
+#         # Step 2: use DisjointSet to find all related item_ids
+#         related_ids = set()
+#         root_map = {}
+#         for node in ds.parent:
+#             root = ds.find(node)
+#             root_map.setdefault(root, set()).add(node)
+
+#         # Then collect related_ids
+#         related_ids = set()
+#         for item_id in matched_ids:
+#             root = ds.find(item_id)
+#             # Include all items with the same root in DS
+#             related_ids.update(root_map.get(root, {item_id}))
+            
+
+#         # Step 3: filter the main queryset to include only matched + related items
+#         items = items.filter(item_id__in=related_ids)
+
+#     # Filter by tags/category if provided
+#     if tags:
+#         tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+#         if tag_list:
+#             category_ids = list(
+#                 Category.objects.filter(name__in=tag_list).values_list("category_id", flat=True)
+#             )
+
+#             tag_query = Q()
+#             for tag in tag_list:
+#                 tag_query |= Q(tags__icontains=tag)
+#             if category_ids:
+#                 tag_query |= Q(category_id__in=category_ids) | Q(subcategory_id__in=category_ids)
+
+#             items = items.filter(tag_query)
+
+#     # Apply sorting
+#     if sort == "newest":
+#         items = items.order_by("-created_at")
+#     elif sort == "price_asc":
+#         items = items.order_by("price")
+#     elif sort == "price_desc":
+#         items = items.order_by("-price")
+
+#     total = items.count()
+
+#     # Pagination
+#     start = (page - 1) * per_page
+#     end = start + per_page
+#     paginated_items = items[start:end]
+
+#     results = []
+#     for item in paginated_items:
+#         results.append(
+#             {
+#                 "id": str(item.item_id),
+#                 "title": item.title,
+#                 "price": f"${item.price}",
+#                 "user": item.seller_id.full_name or "Anonymous",
+#                 "user_id": str(item.seller_id.user_id),
+#                 "user_avatar": item.seller_id.avatar_url,
+#                 "time": get_relative_time(item.created_at),
+#                 "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+#             }
+#         )
+
+#     return JsonResponse(
+#         {
+#             "results": results,
+#             "total": total,
+#             "page": page,
+#             "per_page": per_page,
+#         },
+#         json_dumps_params={"indent": 2},
+#     )
+
 def search_view(request):
+    # -----------------------------
+    # 1️⃣ Extract query params
+    # -----------------------------
     query = request.GET.get("q", "").strip()
-    tags = request.GET.get("tags", "").strip()
+    tags_param = request.GET.get("tags", [])
     sort = request.GET.get("sort", "relevance")
     page = int(request.GET.get("page", 1))
     per_page = int(request.GET.get("per_page", 12))
 
-    items = Item.objects.filter(is_active=True).select_related("seller_id")
+    # -----------------------------
+    # 2️⃣ Base queryset
+    # -----------------------------
+    items_qs = Item.objects.filter(is_active=True).select_related("seller_id")
 
-    ds.populate_from_db()  # load the disjoint sets into memory
-
+    # -----------------------------
+    # 3️⃣ Filter items by query using pre-populated DSU
+    # -----------------------------
     if query:
-        # Step 1: find items whose title matches the query
-        matched_items = list(items.filter(title__icontains=query))
+        matched_items = list(items_qs.filter(title__icontains=query))
         matched_ids = [item.item_id for item in matched_items]
 
-        # Step 2: use DisjointSet to find all related item_ids
         related_ids = set()
         for item_id in matched_ids:
-            root = ds.find(item_id)
-            # Include all items with the same root in DS
-            related_ids.update(
-                [node for node, parent in ds.parent.items() if ds.find(node) == root]
-            )
+            try:
+                root = ds.find(item_id)
+                # Add all members of this root
+                group_members = [node for node in ds.parent if ds.find(node) == root]
+                related_ids.update(group_members)
+            except KeyError:
+                # Item not in DSU (no tags), include individually
+                related_ids.add(item_id)
 
-        # Step 3: filter the main queryset to include only matched + related items
-        items = items.filter(item_id__in=related_ids)
+        # Filter main queryset
+        items_qs = items_qs.filter(item_id__in=related_ids)
 
-    # Filter by tags/category if provided
-    if tags:
-        tag_list = [tag.strip() for tag in tags.split(",") if tag.strip()]
+    # -----------------------------
+    # 4️⃣ Optional: filter by tags_param
+    # -----------------------------
+    if tags_param:
+        if isinstance(tags_param, str):
+            tag_list = [t.strip() for t in tags_param.split(",") if t.strip()]
+        elif isinstance(tags_param, list):
+            tag_list = [t.strip() for t in tags_param if t.strip()]
+        else:
+            tag_list = []
+
         if tag_list:
-            category_ids = list(
-                Category.objects.filter(name__in=tag_list).values_list("category_id", flat=True)
-            )
-
             tag_query = Q()
             for tag in tag_list:
                 tag_query |= Q(tags__icontains=tag)
-            if category_ids:
-                tag_query |= Q(category_id__in=category_ids) | Q(subcategory_id__in=category_ids)
+            items_qs = items_qs.filter(tag_query)
 
-            items = items.filter(tag_query)
-
-    # Apply sorting
+    # -----------------------------
+    # 5️⃣ Sorting
+    # -----------------------------
     if sort == "newest":
-        items = items.order_by("-created_at")
+        items_qs = items_qs.order_by("-created_at")
     elif sort == "price_asc":
-        items = items.order_by("price")
+        items_qs = items_qs.order_by("price")
     elif sort == "price_desc":
-        items = items.order_by("-price")
+        items_qs = items_qs.order_by("-price")
 
-    total = items.count()
-
-    # Pagination
+    # -----------------------------
+    # 6️⃣ Pagination
+    # -----------------------------
+    total = items_qs.count()
     start = (page - 1) * per_page
     end = start + per_page
-    paginated_items = items[start:end]
+    paginated_items = items_qs[start:end]
 
+    # -----------------------------
+    # 7️⃣ Format results
+    # -----------------------------
     results = []
     for item in paginated_items:
         results.append(
@@ -328,7 +448,7 @@ def search_view(request):
                 "user_id": str(item.seller_id.user_id),
                 "user_avatar": item.seller_id.avatar_url,
                 "time": get_relative_time(item.created_at),
-                "image": item.thumbnail_url if hasattr(item, "thumbnail_url") else None,
+                "image": getattr(item, "thumbnail_url", None),
             }
         )
 
@@ -341,6 +461,8 @@ def search_view(request):
         },
         json_dumps_params={"indent": 2},
     )
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def create_listing_view(request):
