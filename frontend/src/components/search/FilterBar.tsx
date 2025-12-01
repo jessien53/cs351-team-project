@@ -1,5 +1,6 @@
 import React from "react";
 import type { SortOption } from "../../types/search";
+import CustomSelect from "../create/CustomSelect";
 
 interface FilterBarProps {
   tags: string[];
@@ -9,6 +10,13 @@ interface FilterBarProps {
 }
 
 const ALL_TAGS = ["Books", "Electronics", "Furniture", "Clothing", "Misc"];
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "relevance", label: "Most relevant" },
+  { value: "newest", label: "Newest" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+];
 
 const FilterBar: React.FC<Partial<FilterBarProps>> = ({
   tags = [],
@@ -42,16 +50,17 @@ const FilterBar: React.FC<Partial<FilterBarProps>> = ({
       ))}
 
       <div className="ml-auto">
-        <select
-          value={sort}
-          onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="px-4 py-2 rounded-lg bg-light text-dark border border-gray-300 focus:border-blue-500 focus:outline-none cursor-pointer"
-        >
-          <option value="relevance">Most relevant</option>
-          <option value="newest">Newest</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-        </select>
+        <CustomSelect
+          value={
+            SORT_OPTIONS.find((opt) => opt.value === sort)?.label ||
+            "Most relevant"
+          }
+          onChange={(label) => {
+            const option = SORT_OPTIONS.find((opt) => opt.label === label);
+            if (option) onSortChange(option.value);
+          }}
+          options={SORT_OPTIONS.map((opt) => opt.label)}
+        />
       </div>
     </div>
   );

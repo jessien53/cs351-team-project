@@ -1,5 +1,6 @@
 import React from "react";
 import type { ListingFormData, ValidationErrors } from "../../types/create.ts";
+import CustomSelect from "./CustomSelect.tsx";
 
 interface Props {
   formData: ListingFormData;
@@ -48,60 +49,35 @@ const ListingDetails: React.FC<Props> = ({
             <label className="block text-sm font-semibold text-ui mb-2">
               Category <span className="text-primary">*</span>
             </label>
-            <div className="relative">
-              <select
-                value={formData.category}
-                onChange={(e) => onFormChange("category", e.target.value)}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white ${
-                  errors.category ? "border-red-500" : "border-gray-200"
-                }`}
-                required
-              >
-                <option value="" className="text-gray-400">
-                  Select...
-                </option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
-                <div className="text-xs text-red-600 mt-1">
-                  {errors.category}
-                </div>
-              )}
-              {/* ... dropdown arrow SVG ... */}
-            </div>
+            <CustomSelect
+              value={formData.category}
+              onChange={(value) => onFormChange("category", value)}
+              options={categories}
+              placeholder="Select..."
+              error={!!errors.category}
+              required
+            />
+            {errors.category && (
+              <div className="text-xs text-red-600 mt-1">{errors.category}</div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-semibold text-ui mb-2">
               Condition <span className="text-primary">*</span>
             </label>
-            <div className="relative">
-              <select
-                value={formData.condition}
-                onChange={(e) => onFormChange("condition", e.target.value)}
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:border-blue-500 focus:outline-none transition appearance-none bg-white ${
-                  errors.condition ? "border-red-500" : "border-gray-200"
-                }`}
-                required
-              >
-                <option value="" className="text-gray-400">
-                  Select...
-                </option>
-                {conditions.map((cond) => (
-                  <option key={cond} value={cond}>
-                    {cond}
-                  </option>
-                ))}
-              </select>
-              {errors.condition && (
-                <div className="text-xs text-red-600 mt-1">
-                  {errors.condition}
-                </div>
-              )}
-            </div>
+            <CustomSelect
+              value={formData.condition}
+              onChange={(value) => onFormChange("condition", value)}
+              options={conditions}
+              placeholder="Select..."
+              error={!!errors.condition}
+              required
+            />
+            {errors.condition && (
+              <div className="text-xs text-red-600 mt-1">
+                {errors.condition}
+              </div>
+            )}
           </div>
         </div>
 
