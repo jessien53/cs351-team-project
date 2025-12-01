@@ -24,6 +24,8 @@ from myapp.views import (
     listing_view,
     profile_listings_view,
     create_listing_view,
+    top_products,
+    populate
 )
 
 urlpatterns = [
@@ -38,4 +40,6 @@ urlpatterns = [
         name="profile_listings",
     ),
     path("api/listings/create/", create_listing_view, name="create_listing"),
+    path('api/top-products/', top_products, name='top-products'),
+    path("api/populate-disjoint-set/", populate, name="populate_disjoint_set"),
 ]
